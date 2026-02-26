@@ -1,0 +1,13 @@
+/* Reuses styles from Login.css, but adds specific signup styling */
+@import '../Login/Login.css';
+
+.signup-card {
+    max-width: 480px;
+    /* slightly wider for more inputs */
+}
+
+.signup-blob {
+    background: #14b8a6;
+    /* teal color for signup blob */
+    animation-delay: -3s;
+}

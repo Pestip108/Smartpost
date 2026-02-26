@@ -9,9 +9,10 @@ Users can connect their social media accounts, generate AI-powered posts based o
 ## 📌 Features
 
 ### 🔐 Authentication
-- User registration & login
+- User registration with **email verification** (6-digit OTP code)
 - Secure JWT-based authentication
 - Role-based access (User / Admin)
+- OTP expires after 15 minutes; limited to 5 attempts
 
 ### 🔗 Social Media Integration
 - Connect multiple social media accounts
@@ -77,12 +78,23 @@ Users can connect their social media accounts, generate AI-powered posts based o
 ---
 ## 🔄 Application Flow
 
-### 1. Connect Social Account
+### 1. Signup & Email Verification
+1. User fills in email + password and submits the signup form
+2. Backend hashes the password and generates a **6-digit OTP code**
+3. OTP is stored temporarily in the `EmailVerification` table (expires in 15 min)
+4. A verification email is sent via SMTP (Nodemailer)
+5. User is redirected to the email verification page
+6. User enters the OTP; backend validates the code, creates the `User` record, and deletes the temporary entry
+7. A JWT token is issued and the user is logged in automatically
+
+> **Resend code**: Users can request a new OTP at any time before expiry. A fresh code is generated, the attempt counter is reset, and a new email is sent.
+
+### 2. Connect Social Account
 1. User selects platform
 2. OAuth login is triggered
 3. Access token is stored securely
 
-### 2. Generate AI Post
+### 3. Generate AI Post
 1. User provides topic
 2. System scrapes related content
 3. AI generates report
@@ -90,7 +102,7 @@ Users can connect their social media accounts, generate AI-powered posts based o
 5. User approves or edits
 6. Post is published
 
-### 3. Scheduled Posts
+### 4. Scheduled Posts
 1. User sets topic + interval
 2. System runs background job
 3. Generates and publishes posts automatically
@@ -116,16 +128,30 @@ npm install
 cp .env.example .env
 ```
 
-Fill the .env file with values:
-```
+Fill the .env file with the values below.
+
+```env
+# Server
 PORT=4000
-FRONTEND_URL=http://localhost:3000
-CORS_ORIGIN=http://localhost:3000
+
+# Database
 DATABASE_URL="mysql://user:password@localhost:3306/smartpost"
 
-JWT_SECRET=
+# Auth
+JWT_SECRET=your_jwt_secret_here
+
+# Email verification (Nodemailer / SMTP)
+# Use an App Password if your provider is Gmail with 2FA enabled.
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+
+# AI & automation
 OPENAI_API_KEY=
 ```
+
+> **Gmail tip:** Enable 2-Step Verification on your Google account, then generate an [App Password](https://myaccount.google.com/apppasswords) and use it as `SMTP_PASS`.
 
 Replace 'user' with your MySQL80 instance user and 'password' with its password.
 
