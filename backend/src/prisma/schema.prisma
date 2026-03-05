@@ -14,8 +14,109 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String   // hashed password
-  createdAt DateTime @default(now())
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  email           String          @unique @db.VarChar(255)
+  password        String          @db.VarChar(255) // hashed
+  role            Role            @default(standard)
+  createdAt       DateTime        @default(now()) @db.Timestamp(0)
+
+  socialAccounts  SocialAccount[]
+}
+
+enum Role {
+  pro
+  standard
+}
+
+model Platform {
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  platformName    String          @unique @db.VarChar(100)
+  apiBaseUrl      String          @db.VarChar(255)
+  isActive        Boolean         @default(true)
+
+  socialAccounts  SocialAccount[]
+}
+
+model SocialAccount {
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  userId          BigInt          @db.UnsignedBigInt
+  platformId      BigInt          @db.UnsignedBigInt
+  accessToken     String          @db.Text // encrypted
+  refreshToken    String?         @db.Text
+  expiresAt       DateTime?       @db.DateTime(0)
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform        Platform        @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  posts           Post[]
+  scheduledTasks  ScheduledTask[]
+
+  @@unique([userId, platformId], name: "unique_user_platform")
+}
+
+model Post {
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  socialAccountId BigInt          @db.UnsignedBigInt
+  content         String?         @db.Text
+  mediaUrl        String?         @db.VarChar(500)
+  type            PostType
+  status          PostStatus      @default(draft)
+  externalPostId  String?         @db.VarChar(255)
+  deleted         Boolean         @default(false)
+  scheduledAt     DateTime?       @db.DateTime(0)
+  createdAt       DateTime        @default(now()) @db.Timestamp(0)
+
+  socialAccount   SocialAccount   @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  researchReports ResearchReport[]
+
+  @@index([status], name: "idx_post_status")
+  @@index([scheduledAt], name: "idx_post_scheduled")
+}
+
+enum PostType {
+  text
+  image
+  video
+}
+
+enum PostStatus {
+  draft
+  scheduled
+  posted
+  failed
+}
+
+model ResearchReport {
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  postId          BigInt          @db.UnsignedBigInt
+  topic           String          @db.VarChar(255)
+  generatedReport String          @db.LongText
+  createdAt       DateTime        @default(now()) @db.Timestamp(0)
+
+  post            Post            @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model ScheduledTask {
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  topic           String          @db.VarChar(255)
+  intervalHours   Int             @db.UnsignedInt
+  nextExecution   DateTime        @db.DateTime(0)
+  isActive        Boolean         @default(true)
+  socialAccountId BigInt          @db.UnsignedBigInt
+  createdAt       DateTime        @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime        @default(now()) @updatedAt @db.Timestamp(0)
+
+  socialAccount   SocialAccount   @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@index([nextExecution], name: "idx_task_next_execution")
+  @@index([isActive], name: "idx_task_active")
+}
+
+model EmailVerification {
+  id              Int             @id @default(autoincrement())
+  email           String          @unique @db.VarChar(255)
+  password        String          @db.VarChar(255) // temporary hashed password
+  code            String          @db.VarChar(6)
+  expiresAt       DateTime
+  attempts        Int             @default(0)
+  createdAt       DateTime        @default(now())
 }
