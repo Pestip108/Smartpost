@@ -1,7 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import Login from './components/Login/Login';
 import Signup from './components/Signup/Signup';
 import EmailVerify from './components/EmailVerify/EmailVerify';
+import Generate from './components/Generate/Generate';
 import './App.css';
 
 function App() {
@@ -11,13 +12,21 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-email" element={<EmailVerify />} />
+        <Route path="/generate" element={<Generate />} />
         <Route path="/" element={
           <div className="placeholder-home">
             <h1>Smartpost Dashboard</h1>
-            <p>Welcome to your workspace.</p>
-            <button onClick={() => { localStorage.clear(); window.location.href = '/login' }} className="auth-btn">
-              Logout
-            </button>
+            <p>Welcome to your workspace. Generate AI-powered social media posts in seconds.</p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '8px' }}>
+              <Link to="/generate">
+                <button className="auth-btn" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', color: '#fff', border: 'none', padding: '12px 28px' }}>
+                  ✨ Generate a Post
+                </button>
+              </Link>
+              <button onClick={() => { localStorage.clear(); window.location.href = '/login' }} className="auth-btn">
+                Logout
+              </button>
+            </div>
           </div>
         } />
         <Route path="*" element={<Navigate to="/login" replace />} />

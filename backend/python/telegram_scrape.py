@@ -1,58 +1,68 @@
-from telethon import TelegramClient
-from flask import Flask, request, jsonify
-import requests
+"""
+Telegram scraper — uses Telethon and requires an authenticated session.
+Run manually once to create the session file, then it can be called via Node.
+"""
+import sys
+import json
 import asyncio
-    
-api_id = 34658383
-api_hash = "79f024fafb229a181aadc2d78b4e6ac4"
 
-client = TelegramClient("session", api_id, api_hash)
+try:
+    from telethon import TelegramClient
+    TELETHON_AVAILABLE = True
+except ImportError:
+    TELETHON_AVAILABLE = False
 
-webhook_url="https://porpoiselike-rory-uncontrovertedly.ngrok-free.dev/webhook-test/156c7d43-06e8-43a3-a60a-cbe69145fa6d"
+API_ID = 34658383
+API_HASH = "79f024fafb229a181aadc2d78b4e6ac4"
 
-app = Flask(__name__)
+CHANNELS = [
+    "openai",
+    "artificialintelligencenews",
+    "ai_daily",
+]
 
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-
-client = TelegramClient("session", api_id, api_hash)
-
-async def init_client():
-    await client.start()
-
-loop.run_until_complete(init_client())
-
-async def fill_data(channel_name):
+async def fill_data(client, channel_name: str):
     data_container = []
     try:
-        channel= await client.get_entity(channel_name)
-        messages = await client.get_messages(channel, limit=30)
-    
+        channel = await client.get_entity(channel_name)
+        messages = await client.get_messages(channel, limit=20)
         for msg in messages:
-            if msg.text:
-                data_container.append({"text":msg.text})
-    except:
-        print(f"{channel_name} error")
-
+            if msg.text and msg.text.strip():
+                data_container.append({"text": msg.text.strip()})
+    except Exception as e:
+        pass
     return data_container
 
-@app.route("/receive", methods=["POST"])
-def main():
-    channel_name = request.json
-    
-    async def get_messages():
-        data = []
-        for channel in channel_name["array"]:
-            msg = await fill_data(channel)
-            data.extend(msg)
-        return data
-    data=dict()
-    data["array"] = loop.run_until_complete(get_messages())
-    data["input"] = channel_name["text"]
 
-    requests.post(webhook_url, json=data, timeout=30)
-    
-    return jsonify({"status": "ok", "messages_count": len(data)})
+async def run_async(prompt: str, channels: list):
+    if not TELETHON_AVAILABLE:
+        return {"source": "telegram", "input": prompt, "array": [], "error": "telethon not installed"}
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+    client = TelegramClient("session", API_ID, API_HASH)
+    data = []
+    try:
+        await client.start()
+        for channel in channels:
+            msgs = await fill_data(client, channel)
+            data.extend(msgs)
+        await client.disconnect()
+    except Exception as e:
+        return {"source": "telegram", "input": prompt, "array": [], "error": str(e)}
+
+    return {"source": "telegram", "input": prompt, "array": data}
+
+
+def run(prompt: str, channels=None):
+    if channels is None:
+        channels = CHANNELS
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    result = loop.run_until_complete(run_async(prompt, channels))
+    loop.close()
+    print(json.dumps(result))
+
+
+if __name__ == "__main__":
+    prompt = sys.argv[1] if len(sys.argv) > 1 else "AI news"
+    run(prompt)

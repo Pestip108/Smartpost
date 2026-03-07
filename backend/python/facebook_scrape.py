@@ -1,78 +1,68 @@
-from playwright.sync_api import sync_playwright
+import sys
+import json
 import random
-import requests
 
-webhook_url="https://porpoiselike-rory-uncontrovertedly.ngrok-free.dev/webhook-test/156c7d43-06e8-43a3-a60a-cbe69145fa6d"
-
-with sync_playwright() as p:
-    context = p.chromium.launch_persistent_context(
-        user_data_dir="user_data",
-        headless=False,
-        channel="chrome"
-    )
-    page = context.new_page()
-
-    # Login manually first time
-    
-    
-    SEARCH_QUERY = "ai news"
-
-    search_url = f"https://www.facebook.com/search/posts/?q={SEARCH_QUERY.replace(' ', '%20')}"
-    page.goto(search_url)
-
-
-    # Scroll
+def run(prompt: str):
+    """
+    NOTE: Facebook scraping requires a persistent Chrome session that has been
+    logged in manually once (user_data_dir). In a headless server it may fail
+    on first run — just open Chrome manually, log into Facebook, then rerun.
+    """
     collected = []
-    print("entering loop")
 
-    for _ in range(1):
-        print(_)
-        page.evaluate("window.scrollBy(0, 5000)")
-        page.wait_for_timeout(random.randint(1500, 2500))
+    try:
+        from playwright.sync_api import sync_playwright
 
-        messages = page.locator('div[data-ad-preview="message"]')
-        count = messages.count()
-        print("got count")
-        if count > 0:
-            for i in range(count):
-                message = messages.nth(i)
-                page.wait_for_timeout(random.randint(500, 1500))
-                print("got message")
+        with sync_playwright() as p:
+            context = p.chromium.launch_persistent_context(
+                user_data_dir="user_data",
+                headless=True,
+                channel="chrome"
+            )
+            page = context.new_page()
 
-                try:
-                    btn = message.locator('[role="button"]:has-text("See more")')
-                    if btn.count() > 0:
-                        btn.first.click(timeout=0)
-                    print("see more pressed")
-                except:
-                    print("pass 1")
-                    pass
+            search_url = f"https://www.facebook.com/search/posts/?q={prompt.replace(' ', '%20')}"
+            page.goto(search_url)
 
-                try:
-                    print("entered try block")
-                    text = page.evaluate("el => el.innerText", message.element_handle())
-                    print("get text")
+            for _ in range(2):
+                page.evaluate("window.scrollBy(0, 5000)")
+                page.wait_for_timeout(random.randint(1500, 2500))
 
-                    if text and text not in collected:
-                        collected.append({"text":text})
-                        print(text)
-                        print("-" * 50)
+                messages = page.locator('div[data-ad-preview="message"]')
+                count = messages.count()
 
-                except:
-                    print("pass 2")
-                    pass
-        else:
-            print("entered else")
-            page.evaluate("window.scrollBy(0, 2000)")
-        
-    page.close()
-    context.close()
-    data = dict()
-    data["array"] = collected
-    data["input"] = {"input": SEARCH_QUERY}
+                if count > 0:
+                    for i in range(min(count, 10)):
+                        message = messages.nth(i)
+                        try:
+                            btn = message.locator('[role="button"]:has-text("See more")')
+                            if btn.count() > 0:
+                                btn.first.click(timeout=3000)
+                        except:
+                            pass
 
-    print(data)
+                        try:
+                            text = page.evaluate("el => el.innerText", message.element_handle())
+                            if text and text.strip() and {"text": text.strip()} not in collected:
+                                collected.append({"text": text.strip()})
+                        except:
+                            pass
+                else:
+                    page.evaluate("window.scrollBy(0, 2000)")
 
-    requests.post(webhook_url, json=data, timeout=30)
+            page.close()
+            context.close()
+    except Exception as e:
+        collected = [{"text": f"Facebook scrape error: {str(e)}"}]
+
+    result = {
+        "source": "facebook",
+        "input": prompt,
+        "array": collected
+    }
+    print(json.dumps(result))
 
 
+if __name__ == "__main__":
+    prompt = sys.argv[1] if len(sys.argv) > 1 else "AI news"
+    run(prompt)
