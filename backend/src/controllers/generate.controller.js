@@ -87,7 +87,6 @@ exports.generate = async (req, res) => {
         });
 
         const postData = await postRes.json();
-        console.log(postData);
 
         // 3. Generate post text via LLM
         // const postText = await generatePostText(sanitizedPrompt, attitude, allTexts);

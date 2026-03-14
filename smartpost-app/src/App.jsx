@@ -3,6 +3,7 @@ import Login from './components/Login/Login';
 import Signup from './components/Signup/Signup';
 import EmailVerify from './components/EmailVerify/EmailVerify';
 import Generate from './components/Generate/Generate';
+import Scheduler from './components/Scheduler/Scheduler';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-email" element={<EmailVerify />} />
         <Route path="/generate" element={<Generate />} />
+        <Route path="/schedule" element={<Scheduler />} />
         <Route path="/" element={
           <div className="placeholder-home">
             <h1>Smartpost Dashboard</h1>
@@ -21,6 +23,11 @@ function App() {
               <Link to="/generate">
                 <button className="auth-btn" style={{ background: 'linear-gradient(135deg,#7c3aed,#2563eb)', color: '#fff', border: 'none', padding: '12px 28px' }}>
                   ✨ Generate a Post
+                </button>
+              </Link>
+              <Link to="/schedule">
+                <button className="auth-btn" style={{ background: 'linear-gradient(135deg,#0ea5e9,#6366f1)', color: '#fff', border: 'none', padding: '12px 28px' }}>
+                  🗓️ Schedule Posts
                 </button>
               </Link>
               <button onClick={() => { localStorage.clear(); window.location.href = '/login' }} className="auth-btn">
@@ -36,3 +43,4 @@ function App() {
 }
 
 export default App;
+
