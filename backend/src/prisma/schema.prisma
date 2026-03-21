@@ -45,6 +45,9 @@ model SocialAccount {
   refreshToken    String?         @db.Text
   expiresAt       DateTime?       @db.DateTime(0)
   redditUsername  String?         @db.VarChar(100)
+  linkedinUrn     String?         @db.VarChar(100)
+  linkedinName    String?         @db.VarChar(255)
+
 
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   platform        Platform        @relation(fields: [platformId], references: [id], onDelete: Cascade)
