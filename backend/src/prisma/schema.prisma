@@ -44,6 +44,7 @@ model SocialAccount {
   accessToken     String          @db.Text // encrypted
   refreshToken    String?         @db.Text
   expiresAt       DateTime?       @db.DateTime(0)
+  redditUsername  String?         @db.VarChar(100)
 
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   platform        Platform        @relation(fields: [platformId], references: [id], onDelete: Cascade)
@@ -52,6 +53,7 @@ model SocialAccount {
 
   @@unique([userId, platformId], name: "unique_user_platform")
 }
+
 
 model Post {
   id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt

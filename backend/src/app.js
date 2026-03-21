@@ -18,5 +18,7 @@ app.use("/api/users", require("./routes/user.routes"));
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/generate", require("./routes/generate.routes"));
 app.use("/api/scheduler", require("./routes/scheduler.routes"));
+app.use("/api/reddit", require("./routes/reddit.routes"));
+
 
 module.exports = app;
