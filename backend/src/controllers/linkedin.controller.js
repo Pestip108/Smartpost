@@ -4,7 +4,7 @@ const prisma = require("../prisma/client");
 const LINKEDIN_AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization";
 const LINKEDIN_TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken";
 const LINKEDIN_API_URL = "https://api.linkedin.com";
-const LINKEDIN_VERSION = "202306"; // LinkedIn API versioning header
+const LINKEDIN_VERSION = "202603"; // LinkedIn API versioning header
 
 
 const PLATFORM_NAME = "linkedin";
