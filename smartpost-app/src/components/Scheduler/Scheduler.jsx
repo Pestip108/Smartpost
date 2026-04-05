@@ -42,6 +42,8 @@ export default function Scheduler() {
     const [includeImage, setIncludeImage] = useState(false);
     const [intervalHours, setIntervalHours] = useState(24);
     const [scheduledAt, setScheduledAt] = useState('');
+    const [publishLinkedIn, setPublishLinkedIn] = useState(false);
+
 
     // ── UI state ──
     const [submitting, setSubmitting] = useState(false);
@@ -51,6 +53,7 @@ export default function Scheduler() {
     // ── Tasks list ──
     const [tasks, setTasks] = useState([]);
     const [loadingTasks, setLoadingTasks] = useState(true);
+    const [linkedinStatus, setLinkedinStatus] = useState({ connected: false });
 
     // Pre-fill scheduledAt with ~1 hour from now
     useEffect(() => {
@@ -59,7 +62,19 @@ export default function Scheduler() {
         const pad = (n) => String(n).padStart(2, '0');
         const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         setScheduledAt(local);
+
+        // Fetch LinkedIn status
+        const fetchStatus = async () => {
+            try {
+                const { data } = await axios.get('http://localhost:4000/api/linkedin/status', { headers: authHeaders() });
+                setLinkedinStatus(data);
+            } catch (err) {
+                console.error('Failed to fetch LinkedIn status:', err);
+            }
+        };
+        fetchStatus();
     }, []);
+
 
     const fetchTasks = async () => {
         setLoadingTasks(true);
@@ -91,8 +106,10 @@ export default function Scheduler() {
                     topic: topic.trim(),
                     attitude,
                     includeImage,
+                    publishLinkedIn,
                     intervalHours: Number(intervalHours),
                     scheduledAt: new Date(scheduledAt).toISOString(),
+
                 },
                 { headers: authHeaders() }
             );
@@ -218,6 +235,24 @@ export default function Scheduler() {
                             <span>· slightly longer processing</span>
                         </span>
                     </div>
+
+                    {/* LinkedIn auto-publish toggle */}
+                    <div className="toggle-row">
+                        <label className="toggle-switch li-toggle">
+                            <input
+                                type="checkbox"
+                                checked={publishLinkedIn}
+                                onChange={(e) => linkedinStatus.connected ? setPublishLinkedIn(e.target.checked) : alert('Please connect LinkedIn first')}
+                                disabled={submitting}
+                            />
+                            <span className="toggle-slider" />
+                        </label>
+                        <span className="toggle-text">
+                            Automatically publish to LinkedIn 🔵
+                        </span>
+                    </div>
+
+
 
                     {error && <div className="sch-error">⚠️ {error}</div>}
                     {success && <div className="sch-success">{success}</div>}

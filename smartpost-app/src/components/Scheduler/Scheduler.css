@@ -274,9 +274,14 @@
     border-color: transparent;
 }
 
+.toggle-switch.li-toggle input:checked+.toggle-slider {
+    background: linear-gradient(135deg, #0077b5, #00a0dc);
+}
+
 .toggle-switch input:checked+.toggle-slider::before {
     transform: translateX(24px);
 }
+
 
 .toggle-text {
     font-size: 0.95rem;

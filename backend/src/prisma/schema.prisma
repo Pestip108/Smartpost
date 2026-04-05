@@ -106,7 +106,9 @@ model ScheduledTask {
   intervalHours   Int             @db.UnsignedInt
   nextExecution   DateTime        @db.DateTime(0)
   isActive        Boolean         @default(true)
+  publishLinkedIn Boolean         @default(false)
   socialAccountId BigInt          @db.UnsignedBigInt
+
   createdAt       DateTime        @default(now()) @db.Timestamp(0)
   updatedAt       DateTime        @default(now()) @updatedAt @db.Timestamp(0)
 
