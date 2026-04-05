@@ -22,6 +22,8 @@ export default function Generate() {
     const [prompt, setPrompt] = useState('');
     const [attitude, setAttitude] = useState('Neutral');
     const [includeImage, setIncludeImage] = useState(false);
+    const [linkedinStatus, setLinkedinStatus] = useState({ connected: false });
+
 
     const [loading, setLoading] = useState(false);
     const [activeStep, setActiveStep] = useState(-1);
@@ -30,8 +32,24 @@ export default function Generate() {
     const [result, setResult] = useState(null);   // { post, imageUrl, sources }
     const [error, setError] = useState('');
     const [copied, setCopied] = useState(false);
+    const [publishing, setPublishing] = useState(false);
+    const [publishSuccess, setPublishSuccess] = useState('');
+
 
     const stepTimers = useRef([]);
+
+    const fetchLinkedinStatus = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const { data } = await axios.get('http://localhost:4000/api/linkedin/status', {
+                headers: { Authorization: token ? `Bearer ${token}` : '' }
+            });
+            setLinkedinStatus(data);
+        } catch (err) {
+            console.error("Failed to fetch LinkedIn status", err);
+        }
+    };
+
 
     // Animate loading steps while request is in-flight
     useEffect(() => {
@@ -53,6 +71,11 @@ export default function Generate() {
             setActiveStep(-1);
         }
     }, [loading, includeImage]);
+
+    useEffect(() => {
+        fetchLinkedinStatus();
+    }, []);
+
 
     const handleGenerate = async (e) => {
         e.preventDefault();
@@ -91,6 +114,29 @@ export default function Generate() {
             setTimeout(() => setCopied(false), 2000);
         });
     };
+
+    const handlePublishToLinkedIn = async () => {
+        if (!result?.post) return;
+        setPublishing(true);
+        setPublishSuccess('');
+        setError('');
+
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post('http://localhost:4000/api/linkedin/post', {
+                text: result.post
+            }, {
+                headers: { Authorization: token ? `Bearer ${token}` : '' }
+            });
+            setPublishSuccess('Post published to LinkedIn!');
+            setTimeout(() => setPublishSuccess(''), 4000);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to publish to LinkedIn');
+        } finally {
+            setPublishing(false);
+        }
+    };
+
 
     const handleReset = () => {
         setResult(null);
@@ -241,10 +287,21 @@ export default function Generate() {
                             <button className={`copy-btn${copied ? ' copied' : ''}`} onClick={handleCopy}>
                                 {copied ? '✓ Copied!' : '📋 Copy Post'}
                             </button>
+                            {linkedinStatus.connected && (
+                                <button
+                                    className="publish-li-btn"
+                                    onClick={handlePublishToLinkedIn}
+                                    disabled={publishing}
+                                >
+                                    {publishing ? <span className="gen-spinner" /> : '🔵 Publish to LinkedIn'}
+                                </button>
+                            )}
                             <button className="new-btn" onClick={handleReset}>
                                 ↩ Generate Another
                             </button>
                         </div>
+                        {publishSuccess && <div className="publish-success">✅ {publishSuccess}</div>}
+
                     </div>
                 )}
             </div>
