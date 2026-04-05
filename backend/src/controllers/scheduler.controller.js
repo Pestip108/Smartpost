@@ -16,9 +16,11 @@ exports.create = async (req, res) => {
         topic,
         attitude = "Neutral",
         includeImage = false,
+        publishLinkedIn = false,
         intervalHours,
         scheduledAt, // ISO string for first run, e.g. "2026-03-14T08:00:00Z"
     } = req.body;
+
 
     if (!topic || typeof topic !== "string" || topic.trim().length === 0) {
         return res.status(400).json({ message: "topic is required" });
@@ -77,9 +79,11 @@ exports.create = async (req, res) => {
                 intervalHours: parseInt(intervalHours, 10),
                 nextExecution: firstRun,
                 isActive: true,
+                publishLinkedIn: !!publishLinkedIn,
                 socialAccountId: socialAccount.id,
             },
         });
+
 
         // Enqueue the first job with a delay until firstRun
         const delay = firstRun.getTime() - Date.now();
@@ -90,8 +94,10 @@ exports.create = async (req, res) => {
                 topic: task.topic,
                 attitude,
                 includeImage,
+                publishLinkedIn: !!publishLinkedIn,
                 userId: userId.toString(),
             },
+
             { delay: Math.max(delay, 0) }
         );
 

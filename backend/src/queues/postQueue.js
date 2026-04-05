@@ -3,6 +3,8 @@ const { spawn } = require("child_process");
 const path = require("path");
 const prisma = require("../prisma/client");
 const nodemailer = require("nodemailer");
+const { publishToLinkedInInternal } = require("../controllers/linkedin.controller");
+
 
 // Node Mailer
 const transporter = nodemailer.createTransport({
@@ -78,8 +80,9 @@ function startWorker() {
     worker = new Worker(
         QUEUE_NAME,
         async (job) => {
-            const { scheduledTaskId, topic, attitude, includeImage, userId } =
+            const { scheduledTaskId, topic, attitude, includeImage, publishLinkedIn, userId } =
                 job.data;
+
 
             console.log(
                 `[BullMQ] Processing job ${job.id} for task ${scheduledTaskId}`
@@ -138,11 +141,21 @@ function startWorker() {
             //     });
             // }
 
-            // 5. Save Post with status = "scheduled" → "posted"
-            const socialAccountId = 1;
-            await prisma.post.create({
+            // 4. Fetch the ScheduledTask to get the correct socialAccountId
+            const task = await prisma.scheduledTask.findUnique({
+                where: { id: BigInt(scheduledTaskId) },
+            });
+
+            if (!task) {
+                console.error(`[BullMQ] Task ${scheduledTaskId} not found.`);
+                return { success: false, error: "Task not found" };
+            }
+
+            // 5. Save Post with status = "draft" (will update to "posted" if auto-publishing)
+            const socialAccountId = task.socialAccountId;
+            let dbPost = await prisma.post.create({
                 data: {
-                    socialAccountId: socialAccountId,
+                    socialAccountId,
                     content: postData.output,
                     mediaUrl: imageUrl,
                     type: includeImage ? "image" : "text",
@@ -151,24 +164,43 @@ function startWorker() {
                 },
             });
 
+
+            // 5b. Auto-publish if enabled
+            let publishedSuccessfully = false;
+            let externalPostId = null;
+
+            if (publishLinkedIn) {
+                try {
+                    console.log(`[BullMQ] Auto-publishing to LinkedIn for user ${userId}`);
+                    const publishRes = await publishToLinkedInInternal(userId, postData.output);
+                    publishedSuccessfully = true;
+                    externalPostId = publishRes.externalPostId;
+
+                    // Update the post record
+                    await prisma.post.update({
+                        where: { id: dbPost.id },
+                        data: {
+                            status: "posted",
+                            externalPostId: externalPostId
+                        }
+                    });
+                } catch (err) {
+                    console.error("[BullMQ] Auto-publish to LinkedIn failed:", err.message);
+                }
+            }
+
+
             // 6. Save ResearchReport
             await prisma.researchReport.create({
                 data: {
-                    postId: (
-                        await prisma.post.findFirst({
-                            where: { socialAccountId: socialAccountId },
-                            orderBy: { createdAt: "desc" },
-                        })
-                    ).id,
+                    postId: dbPost.id,
                     topic,
                     generatedReport: JSON.stringify(googleData),
                 },
             });
 
+
             // 7. Update ScheduledTask.nextExecution
-            const task = await prisma.scheduledTask.findUnique({
-                where: { id: BigInt(scheduledTaskId) },
-            });
             if (task && task.isActive) {
                 const next = new Date(
                     Date.now() + task.intervalHours * 60 * 60 * 1000
@@ -177,6 +209,7 @@ function startWorker() {
                     where: { id: task.id },
                     data: { nextExecution: next },
                 });
+
                 // Re-queue for next execution
                 const delay = next.getTime() - Date.now();
                 await postQueue.add(
@@ -190,15 +223,23 @@ function startWorker() {
 
             const bigUserId = BigInt(userId);
             let user = await prisma.user.findUnique({ where: { id: bigUserId } });
-            let subject = "Post Successfuly Created!";
-            let text = `Your post about ${topic} was successfuly created!`;
-            let html = `<p>You post about <strong>"${topic}"</strong> was successfuly created and stored as draft!<br/>We can't post it yet because no social account has been linked yet.</p>
-            <br/><br/>
-            <p>${postData.output}</p>
-            <img src="../../${imageUrl}" alt="Post Image" />
-            `;
+            
+            let subject = publishedSuccessfully 
+                ? "Post Published to LinkedIn!" 
+                : "Post Successfully Created!";
+            
+            let text = publishedSuccessfully
+                ? `Your post about ${topic} was automatically published to LinkedIn!`
+                : `Your post about ${topic} was successfully created as a draft!`;
+            
+            let html = publishedSuccessfully
+                ? `<p>Your post about <strong>"${topic}"</strong> was automatically published to your LinkedIn account!<br/>You can view it on your LinkedIn feed.</p>
+                   <br/><p>${postData.output}</p>`
+                : `<p>Your post about <strong>"${topic}"</strong> was successfully created and stored as a draft!</p>
+                   <br/><p>${postData.output}</p>`;
 
             await sendEmail(user.email, subject, text, html);
+
 
             return { success: true };
         },

@@ -224,40 +224,12 @@ const createPost = async (req, res) => {
   }
 
   try {
-    const account = await getAccount(req.user.userId);
-    if (!account) {
-      return res.status(403).json({ message: "LinkedIn account not connected" });
-    }
-
-    const token = await getValidToken(account);
-
-    const payload = {
-      author: account.linkedinUrn,
-      commentary: text.trim(),
-      visibility: "PUBLIC",
-      distribution: {
-        feedDistribution: "MAIN_FEED",
-        targetEntities: [],
-        thirdPartyDistributionChannels: [],
-      },
-      lifecycleState: "PUBLISHED",
-      isReshareDisabledByAuthor: false,
-    };
-
-    const postRes = await axios.post(
-      `${LINKEDIN_API_URL}/rest/posts`,
-      payload,
-      { headers: linkedInHeaders(token) }
-    );
-
-    // LinkedIn returns the post URN in the x-restli-id response header
-    const externalPostId =
-      postRes.headers["x-restli-id"] || postRes.data?.id || null;
+    const { externalPostId, accountId } = await publishToLinkedInInternal(req.user.userId, text);
 
     // Persist to DB
     const dbPost = await prisma.post.create({
       data: {
-        socialAccountId: account.id,
+        socialAccountId: accountId,
         content: text.trim(),
         type: "text",
         status: "posted",
@@ -272,9 +244,10 @@ const createPost = async (req, res) => {
     });
   } catch (err) {
     console.error("LinkedIn createPost error:", err.response?.data || err.message);
-    res.status(500).json({ message: "Failed to post to LinkedIn" });
+    res.status(500).json({ message: err.message || "Failed to post to LinkedIn" });
   }
 };
+
 
 /**
  * PATCH /api/linkedin/post/:postId
@@ -433,6 +406,48 @@ const disconnect = async (req, res) => {
   }
 };
 
+/**
+ * Internal helper for the background worker or other services to publish to LinkedIn.
+ * Does NOT require an Express req/res object.
+ */
+async function publishToLinkedInInternal(userId, text) {
+  try {
+    const account = await getAccount(userId);
+    if (!account) {
+      throw new Error(`LinkedIn account not connected for user ${userId}`);
+    }
+
+    const token = await getValidToken(account);
+
+    const payload = {
+      author: account.linkedinUrn,
+      commentary: text.trim(),
+      visibility: "PUBLIC",
+      distribution: {
+        feedDistribution: "MAIN_FEED",
+        targetEntities: [],
+        thirdPartyDistributionChannels: [],
+      },
+      lifecycleState: "PUBLISHED",
+      isReshareDisabledByAuthor: false,
+    };
+
+    const postRes = await axios.post(
+      `${LINKEDIN_API_URL}/rest/posts`,
+      payload,
+      { headers: linkedInHeaders(token) }
+    );
+
+    const externalPostId = postRes.headers["x-restli-id"] || postRes.data?.id || null;
+
+    return { success: true, externalPostId, accountId: account.id };
+  } catch (err) {
+    console.error("LinkedIn internal publish error:", err.response?.data || err.message);
+    throw err;
+  }
+}
+
+
 module.exports = {
   initiateLogin,
   callback,
@@ -442,4 +457,10 @@ module.exports = {
   deletePost,
   getPosts,
   disconnect,
+  // Helper exports for the worker
+  getAccount,
+  getValidToken,
+  linkedInHeaders,
+  publishToLinkedInInternal,
 };
+
