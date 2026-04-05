@@ -1,101 +1,221 @@
-/* Reuses styles from Login.css */
 @import '../Login/Login.css';
 
+/* ── Verify page ─────────────────────────────── */
+.verify-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-page);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.verify-blobs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.verify-blob-1, .verify-blob-2 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  animation: blobDrift 14s ease-in-out infinite alternate;
+}
+.verify-blob-1 {
+  background: radial-gradient(circle, #6366f1, #8b5cf6);
+  width: 500px; height: 500px;
+  top: -150px; left: -100px;
+  opacity: 0.1;
+}
+.verify-blob-2 {
+  background: radial-gradient(circle, #06b6d4, #0ea5e9);
+  width: 400px; height: 400px;
+  bottom: -100px; right: -100px;
+  opacity: 0.08;
+  animation-direction: alternate-reverse;
+  animation-delay: -7s;
+}
+
 .verify-card {
-    max-width: 440px;
+  position: relative;
+  z-index: 2;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 48px 40px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
 }
 
-.verify-header h2 {
-    background: linear-gradient(to right, #6ee7b7, #3b82f6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* Icon */
+.verify-icon-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.verify-icon-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.1);
+  border: 2px solid rgba(99,102,241,0.3);
+  animation: pulse-ring 2.5s ease-in-out infinite;
+}
+.verify-icon {
+  font-size: 2.4rem;
+  z-index: 1;
+  animation: float 3s ease-in-out infinite alternate;
+}
+@keyframes float {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-6px); }
 }
 
-.code-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin: 1rem 0 1.5rem;
+/* Header */
+.verify-header {
+  text-align: center;
+}
+.verify-header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.4px;
+  margin-bottom: 8px;
+}
+.verify-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.verify-email {
+  color: var(--primary-light);
+  font-size: 0.95rem;
+  word-break: break-all;
 }
 
-.code-input {
-    width: 3.5rem;
-    height: 4rem;
-    font-size: 2rem;
-    font-weight: 700;
-    text-align: center;
-    border-radius: 12px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--glass-border);
-    color: var(--text-primary);
-    transition: all 0.3s ease;
+/* Form */
+.verify-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
-.code-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
-    transform: translateY(-2px);
+/* OTP inputs */
+.otp-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.otp-input {
+  width: 52px;
+  height: 62px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.otp-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+  background: var(--bg-input-focus);
+}
+.otp-input:not(:placeholder-shown):not(:focus) {
+  border-color: var(--success);
 }
 
-.timer-display {
-    text-align: center;
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
+/* Timer */
+.timer-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+.timer-ring {
+  transform: none;
+  overflow: visible;
+}
+.timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+.timer-danger { color: var(--danger); }
+.timer-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: -12px;
 }
 
-.text-danger {
-    color: #ef4444;
-    font-weight: 600;
-    animation: pulse 1s infinite alternate;
+/* Resend */
+.verify-resend {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
-
-.resend-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--glass-border);
+.verify-resend p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
-
 .resend-btn {
-    background: none;
-    border: none;
-    color: var(--primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding: 0;
-    font-family: inherit;
-    font-size: 0.95rem;
+  background: none;
+  border: none;
+  color: var(--primary-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition);
 }
-
 .resend-btn:hover:not(:disabled) {
-    text-decoration: underline;
-    color: #818cf8;
+  background: rgba(99,102,241,0.1);
+  color: var(--primary);
 }
-
 .resend-btn:disabled {
-    color: var(--text-secondary);
-    cursor: not-allowed;
-    opacity: 0.7;
+  color: var(--text-muted);
+  cursor: not-allowed;
 }
 
-.verify-blob {
-    background: #3b82f6;
-    /* Blue color for verify blob */
-    animation-delay: -7s;
+/* Light mode adjustments */
+[data-theme="light"] .verify-card {
+  background: rgba(255,255,255,0.9);
 }
 
-@keyframes pulse {
-    from {
-        opacity: 0.7;
-    }
-
-    to {
-        opacity: 1;
-    }
+@media (max-width: 480px) {
+  .verify-card { padding: 36px 24px; }
+  .otp-input   { width: 44px; height: 54px; font-size: 1.4rem; }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './Generate.css';
 
 const API_URL = 'http://localhost:4000/api/generate';
@@ -24,17 +25,15 @@ export default function Generate() {
     const [includeImage, setIncludeImage] = useState(false);
     const [linkedinStatus, setLinkedinStatus] = useState({ connected: false });
 
-
     const [loading, setLoading] = useState(false);
     const [activeStep, setActiveStep] = useState(-1);
     const [doneSteps, setDoneSteps] = useState([]);
 
-    const [result, setResult] = useState(null);   // { post, imageUrl, sources }
+    const [result, setResult] = useState(null);
     const [error, setError] = useState('');
     const [copied, setCopied] = useState(false);
     const [publishing, setPublishing] = useState(false);
     const [publishSuccess, setPublishSuccess] = useState('');
-
 
     const stepTimers = useRef([]);
 
@@ -50,13 +49,10 @@ export default function Generate() {
         }
     };
 
-
-    // Animate loading steps while request is in-flight
     useEffect(() => {
         if (loading) {
             setActiveStep(0);
             setDoneSteps([]);
-
             const steps = includeImage ? LOADING_STEPS : LOADING_STEPS.slice(0, 3);
             steps.forEach((_, i) => {
                 const t = setTimeout(() => {
@@ -72,10 +68,7 @@ export default function Generate() {
         }
     }, [loading, includeImage]);
 
-    useEffect(() => {
-        fetchLinkedinStatus();
-    }, []);
-
+    useEffect(() => { fetchLinkedinStatus(); }, []);
 
     const handleGenerate = async (e) => {
         e.preventDefault();
@@ -94,12 +87,10 @@ export default function Generate() {
                 includeImage,
             }, {
                 timeout: 120_000,
-                headers: {
-                    Authorization: token ? `Bearer ${token}` : ''
-                }
+                headers: { Authorization: token ? `Bearer ${token}` : '' }
             });
-
             setResult(data);
+            setDoneSteps(includeImage ? [0, 1, 2, 3] : [0, 1, 2]); // Mark all steps complete
         } catch (err) {
             setError(err.response?.data?.message || err.message || 'Something went wrong. Please try again.');
         } finally {
@@ -137,174 +128,167 @@ export default function Generate() {
         }
     };
 
-
     const handleReset = () => {
         setResult(null);
         setError('');
         setDoneSteps([]);
+        setPrompt('');
     };
 
     const visibleSteps = includeImage ? LOADING_STEPS : LOADING_STEPS.slice(0, 3);
 
     return (
-        <div className="generate-container">
-            {/* Background blobs */}
-            <div className="gen-blob gen-blob-1" />
-            <div className="gen-blob gen-blob-2" />
-            <div className="gen-blob gen-blob-3" />
+        <div className="content-container generate-container">
+            <Link to="/" className="back-link">← Back to Dashboard</Link>
 
-            <div className="generate-content">
-                {/* Header */}
-                <div className="gen-header">
-                    <h1>✨ AI Post Generator</h1>
-                    <p>Describe your topic and let AI craft the perfect social media post.</p>
+            <div className="section-title-row">
+                <div className="page-header">
+                    <span className="page-header-icon">✨</span>
+                    <div>
+                        <h1 className="page-title">AI Post Generator</h1>
+                        <p className="page-subtitle">Describe your topic and let AI craft the perfect social media post.</p>
+                    </div>
                 </div>
+            </div>
 
-                {/* Form card */}
-                {!result && (
-                    <form className="gen-card" onSubmit={handleGenerate}>
-                        {/* Prompt */}
-                        <div>
-                            <label className="gen-label" htmlFor="gen-prompt">Your topic / prompt</label>
-                            <textarea
-                                id="gen-prompt"
-                                className="gen-textarea"
-                                placeholder="e.g. The rise of AI agents in 2025…"
-                                value={prompt}
-                                onChange={(e) => setPrompt(e.target.value)}
-                                required
-                                disabled={loading}
-                            />
-                        </div>
+            {!result && !loading && (
+                <form className="glass generate-card" onSubmit={handleGenerate}>
+                    {error && <div className="banner banner-error">{error}</div>}
 
-                        {/* Attitude */}
-                        <div>
-                            <span className="gen-label">Tone / Attitude</span>
-                            <div className="attitude-group">
-                                {ATTITUDES.map(({ value, emoji, label }) => (
-                                    <React.Fragment key={value}>
-                                        <input
-                                            type="radio"
-                                            name="attitude"
-                                            id={`att-${value}`}
-                                            className="attitude-option"
-                                            value={value}
-                                            checked={attitude === value}
-                                            onChange={() => setAttitude(value)}
-                                            disabled={loading}
-                                        />
-                                        <label htmlFor={`att-${value}`} className="attitude-label">
-                                            <span className="attitude-emoji">{emoji}</span>
-                                            {label}
-                                        </label>
-                                    </React.Fragment>
-                                ))}
-                            </div>
-                        </div>
+                    <div className="form-group">
+                        <label className="sp-label" htmlFor="gen-prompt">Your topic / prompt</label>
+                        <textarea
+                            id="gen-prompt"
+                            className="sp-textarea"
+                            placeholder="e.g. The rise of AI agents in 2025 and how they change development workflows…"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
 
-                        {/* Image toggle */}
-                        <div className="toggle-row">
-                            <label className="toggle-switch">
-                                <input
-                                    type="checkbox"
-                                    id="include-image"
-                                    checked={includeImage}
-                                    onChange={(e) => setIncludeImage(e.target.checked)}
-                                    disabled={loading}
-                                />
-                                <span className="toggle-slider" />
-                            </label>
-                            <span className="toggle-text">
-                                Include AI-generated image
-                                <span>· takes a bit longer</span>
-                            </span>
-                        </div>
-
-                        {/* Error */}
-                        {error && <div className="gen-error">⚠️ {error}</div>}
-
-                        {/* Submit */}
-                        <button type="submit" className="gen-btn" disabled={loading || !prompt.trim()}>
-                            {loading ? (
-                                <>
-                                    <span className="gen-spinner" />
-                                    Generating…
-                                </>
-                            ) : (
-                                <>✨ Generate Post</>
-                            )}
-                        </button>
-                    </form>
-                )}
-
-                {/* Loading skeleton */}
-                {loading && (
-                    <div className="loading-card">
-                        <div className="skeleton-line w-full" />
-                        <div className="skeleton-line w-3-4" />
-                        <div className="skeleton-line w-2-3" />
-                        <div className="skeleton-line w-1-2" />
-                        {includeImage && <div className="skeleton-img" />}
-
-                        <div className="loading-steps">
-                            {visibleSteps.map((step, i) => (
-                                <div
-                                    key={i}
-                                    className={`loading-step${activeStep === i ? ' active' : ''}${doneSteps.includes(i) ? ' done' : ''}`}
-                                >
-                                    <span className="step-dot" />
-                                    {step}
-                                </div>
+                    <div className="form-group">
+                        <span className="sp-label">Tone / Attitude</span>
+                        <div className="pill-group">
+                            {ATTITUDES.map(({ value, emoji, label }) => (
+                                <React.Fragment key={value}>
+                                    <input
+                                        type="radio"
+                                        name="attitude"
+                                        id={`att-${value}`}
+                                        className="pill-radio"
+                                        value={value}
+                                        checked={attitude === value}
+                                        onChange={() => setAttitude(value)}
+                                        disabled={loading}
+                                    />
+                                    <label htmlFor={`att-${value}`} className="pill-label">
+                                        <span>{emoji}</span> {label}
+                                    </label>
+                                </React.Fragment>
                             ))}
                         </div>
                     </div>
-                )}
 
-                {/* Result */}
-                {result && !loading && (
-                    <div className="result-card">
-                        <div className="result-header">
-                            <span className="result-title">Generated Post</span>
-                            <div className="result-badges">
-                                <span className="result-badge">📡 {result.scrapedCount ?? 0} sources scraped</span>
-                                <span className="result-badge">🎭 {attitude}</span>
-                            </div>
-                        </div>
-
-                        <div className="post-text-box">{result.post}</div>
-
-                        {result.imageUrl && (
-                            <img
-                                src={`http://localhost:4000${result.imageUrl}`}
-                                alt="AI generated"
-                                className="gen-result-image"
+                    <div className="toggle-wrap toggle-image">
+                        <label className="toggle">
+                            <input
+                                type="checkbox"
+                                checked={includeImage}
+                                onChange={(e) => setIncludeImage(e.target.checked)}
+                                disabled={loading}
                             />
-                        )}
-
-                        {error && <div className="gen-error">⚠️ {error}</div>}
-
-                        <div className="result-actions">
-                            <button className={`copy-btn${copied ? ' copied' : ''}`} onClick={handleCopy}>
-                                {copied ? '✓ Copied!' : '📋 Copy Post'}
-                            </button>
-                            {linkedinStatus.connected && (
-                                <button
-                                    className="publish-li-btn"
-                                    onClick={handlePublishToLinkedIn}
-                                    disabled={publishing}
-                                >
-                                    {publishing ? <span className="gen-spinner" /> : '🔵 Publish to LinkedIn'}
-                                </button>
-                            )}
-                            <button className="new-btn" onClick={handleReset}>
-                                ↩ Generate Another
-                            </button>
-                        </div>
-                        {publishSuccess && <div className="publish-success">✅ {publishSuccess}</div>}
-
+                            <span className="toggle-track" />
+                        </label>
+                        <span className="toggle-label">
+                            Include AI-generated image
+                            <small>· Takes a bit longer</small>
+                        </span>
                     </div>
-                )}
-            </div>
+
+                    <button type="submit" className="btn btn-primary btn-full" disabled={loading || !prompt.trim()}>
+                        ✨ Generate Post
+                    </button>
+                </form>
+            )}
+
+            {/* Loading State */}
+            {loading && (
+                <div className="glass loading-card">
+                    <div className="loading-orbit">
+                        <div className="orbit-center">🧠</div>
+                        <div className="orbit-ring" />
+                        <div className="orbit-ring orbit-ring-2" />
+                        <div className="orbit-dot" />
+                    </div>
+
+                    <div className="loading-text">Crafting your post…</div>
+
+                    <div className="loading-steps">
+                        {visibleSteps.map((step, i) => (
+                            <div
+                                key={i}
+                                className={`loading-step${activeStep === i ? ' active' : ''}${doneSteps.includes(i) ? ' done' : ''}`}
+                            >
+                                <span className="step-indicator">
+                                    {doneSteps.includes(i) ? '✓' : activeStep === i ? <span className="spinner spinner-dark" /> : '·'}
+                                </span>
+                                {step}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="skeleton loading-skel-1" />
+                    <div className="skeleton loading-skel-2" />
+                    <div className="skeleton loading-skel-3" />
+                </div>
+            )}
+
+            {/* Result State */}
+            {result && !loading && (
+                <div className="glass result-card">
+                    <div className="result-header">
+                        <h2 className="result-title">Generated Post</h2>
+                        <div className="result-badges">
+                            <span className="chip chip-default">📡 {result.scrapedCount ?? 0} sources</span>
+                            <span className="chip chip-default">🎭 {attitude}</span>
+                        </div>
+                    </div>
+
+                    <div className="result-content-body">
+                        {result.post}
+                    </div>
+
+                    {result.imageUrl && (
+                        <div className="result-image-wrap">
+                            <img src={`http://localhost:4000${result.imageUrl}`} alt="AI generated" className="result-image" />
+                        </div>
+                    )}
+
+                    {error && <div className="banner banner-error">{error}</div>}
+                    {publishSuccess && <div className="banner banner-success">✅ {publishSuccess}</div>}
+
+                    <div className="result-actions">
+                        <button className="btn btn-ghost" onClick={handleCopy}>
+                            {copied ? '✓ Copied!' : '📋 Copy Post'}
+                        </button>
+                        {linkedinStatus.connected && (
+                            <button
+                                className="btn btn-primary"
+                                onClick={handlePublishToLinkedIn}
+                                disabled={publishing}
+                            >
+                                {publishing ? <span className="spinner" /> : '🔵 Publish to LinkedIn'}
+                            </button>
+                        )}
+                        <div style={{ flex: 1 }} />
+                        <button className="btn btn-ghost" onClick={handleReset}>
+                            ↩ Generate Another
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

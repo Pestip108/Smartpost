@@ -15,17 +15,14 @@ export default function LinkedIn() {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(false);
 
-  // Composer
   const [text, setText] = useState('');
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState('');
 
-  // Edit
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
 
-  // UI
   const [disconnecting, setDisconnecting] = useState(false);
   const [toast, setToast] = useState('');
   const [charCount, setCharCount] = useState(0);
@@ -80,10 +77,7 @@ export default function LinkedIn() {
 
   const handleConnect = () => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      showToast('❌ You must be logged in to connect LinkedIn.');
-      return;
-    }
+    if (!token) return showToast('❌ You must be logged in to connect LinkedIn.');
     window.location.href = `${API}/login?token=${encodeURIComponent(token)}`;
   };
 
@@ -106,14 +100,9 @@ export default function LinkedIn() {
     e.preventDefault();
     setPostError('');
     if (!text.trim()) return;
-
     try {
       setPosting(true);
-      await axios.post(
-        `${API}/post`,
-        { text: text.trim() },
-        { headers: authHeaders() }
-      );
+      await axios.post(`${API}/post`, { text: text.trim() }, { headers: authHeaders() });
       setText('');
       setCharCount(0);
       fetchPosts();
@@ -125,36 +114,20 @@ export default function LinkedIn() {
     }
   };
 
-  const handleTextChange = (e) => {
-    setText(e.target.value);
-    setCharCount(e.target.value.length);
-  };
-
-  const startEdit = (post) => {
-    setEditingId(post.id);
-    setEditText(post.content || '');
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditText('');
-  };
+  const startEdit = (post) => { setEditingId(post.id); setEditText(post.content || ''); };
+  const cancelEdit = () => { setEditingId(null); setEditText(''); };
 
   const saveEdit = async (postId) => {
     if (!editText.trim()) return;
     try {
       setSavingEdit(true);
-      await axios.patch(
-        `${API}/post/${postId}`,
-        { text: editText.trim() },
-        { headers: authHeaders() }
-      );
+      await axios.patch(`${API}/post/${postId}`, { text: editText.trim() }, { headers: authHeaders() });
       showToast('✏️ Post updated!');
       setEditingId(null);
       setEditText('');
       fetchPosts();
     } catch (err) {
-      showToast('❌ ' + (err.response?.data?.message || 'Failed to edit post'));
+      showToast('❌ ' + (err.response?.data?.message || 'Failed to edit'));
     } finally {
       setSavingEdit(false);
     }
@@ -172,144 +145,107 @@ export default function LinkedIn() {
   };
 
   const formatDate = (iso) =>
-    new Date(iso).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  const initials = (name) =>
-    name ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() : 'LI';
+  const initials = (name) => name ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() : 'LI';
 
   return (
-    <div className="li-page">
-      <div className="li-blob li-blob-1" />
-      <div className="li-blob li-blob-2" />
-      <div className="li-blob li-blob-3" />
+    <div className="content-container social-container">
+      {toast && <div className="toast">{toast}</div>}
 
-      {toast && <div className="li-toast">{toast}</div>}
-
-      <div className="li-content">
-        {/* Header */}
-        <div className="li-header">
-          <div className="li-logo">
-            <svg viewBox="0 0 34 34" aria-hidden="true" className="li-icon">
-              <rect width="34" height="34" rx="6" fill="#0077B5" />
-              <path
-                d="M7 12h4v14H7zm2-6a2 2 0 110 4 2 2 0 010-4zm6 6h4v2h.06c.56-1.06 1.93-2.18 3.97-2.18C26.9 11.82 27 14.93 27 17.6V26h-4v-7.63c0-1.82-.03-4.16-2.54-4.16-2.54 0-2.93 1.98-2.93 4.03V26h-4V12z"
-                fill="#fff"
-              />
-            </svg>
-          </div>
-          <div>
-            <h1 className="li-title">LinkedIn</h1>
-            <p className="li-subtitle">Publish professional posts to your LinkedIn network</p>
-          </div>
+      <div className="page-header">
+        <div className="social-logo li-logo">
+          <svg viewBox="0 0 34 34" aria-hidden="true" width="40" height="40">
+            <rect width="34" height="34" rx="6" fill="#0077B5" />
+            <path d="M7 12h4v14H7zm2-6a2 2 0 110 4 2 2 0 010-4zm6 6h4v2h.06c.56-1.06 1.93-2.18 3.97-2.18C26.9 11.82 27 14.93 27 17.6V26h-4v-7.63c0-1.82-.03-4.16-2.54-4.16-2.54 0-2.93 1.98-2.93 4.03V26h-4V12z" fill="#fff" />
+          </svg>
         </div>
+        <div>
+          <h1 className="page-title">LinkedIn</h1>
+          <p className="page-subtitle">Publish professional posts to your LinkedIn network</p>
+        </div>
+      </div>
 
+      <div className="social-layout">
         {/* Account Panel */}
-        <div className="li-card account-card">
-          <div className="card-section-title">Account</div>
+        <div className="glass account-card">
+          <div className="section-title">Account</div>
           {loadingStatus ? (
-            <div className="li-skeleton" style={{ height: 48, borderRadius: 12 }} />
+            <div className="skeleton" style={{ height: 56, borderRadius: 12 }} />
           ) : status.connected ? (
-            <div className="account-row">
-              <div className="account-avatar">
-                {initials(status.name)}
-              </div>
+            <div className="account-row connected">
+              <div className="account-avatar li-avatar">{initials(status.name)}</div>
               <div className="account-info">
                 <span className="account-name">{status.name || 'LinkedIn User'}</span>
                 <span className="account-badge connected-badge">● Connected</span>
               </div>
-              <button
-                className="li-btn li-btn-danger"
-                onClick={handleDisconnect}
-                disabled={disconnecting}
-              >
+              <button className="btn btn-danger btn-sm" onClick={handleDisconnect} disabled={disconnecting}>
                 {disconnecting ? 'Disconnecting…' : 'Disconnect'}
               </button>
             </div>
           ) : (
-            <div className="account-row account-row-disconnected">
+            <div className="account-row disconnected">
               <div className="account-avatar disconnected-avatar">in</div>
               <div className="account-info">
-                <span className="account-name">No LinkedIn account linked</span>
+                <span className="account-name">No account linked</span>
                 <span className="account-badge disconnected-badge">● Disconnected</span>
               </div>
-              <button className="li-btn li-btn-primary connect-btn" onClick={handleConnect}>
-                <svg viewBox="0 0 34 34" className="btn-li-icon" aria-hidden="true">
-                  <rect width="34" height="34" rx="6" fill="currentColor" opacity="0.25" />
-                  <path d="M7 12h4v14H7zm2-6a2 2 0 110 4 2 2 0 010-4zm6 6h4v2h.06c.56-1.06 1.93-2.18 3.97-2.18C26.9 11.82 27 14.93 27 17.6V26h-4v-7.63c0-1.82-.03-4.16-2.54-4.16-2.54 0-2.93 1.98-2.93 4.03V26h-4V12z" fill="currentColor" />
-                </svg>
+              <button className="btn btn-primary" onClick={handleConnect}>
                 Connect LinkedIn
               </button>
             </div>
           )}
         </div>
 
-        {/* Post Composer */}
+        {/* Composer */}
         {status.connected && (
-          <div className="li-card composer-card">
-            <div className="card-section-title">Create a Post</div>
-            <form onSubmit={handlePost} className="composer-form">
-              <div className="composer-field">
-                <label className="li-label" htmlFor="li-post-text">
-                  What do you want to share?
-                </label>
+          <div className="glass composer-card">
+            <div className="section-title">Create a Post</div>
+            <form onSubmit={handlePost}>
+              <div className="form-group">
                 <div className="textarea-wrap">
                   <textarea
-                    id="li-post-text"
-                    className="li-textarea"
+                    className="sp-textarea"
                     placeholder="Share an insight, update, or idea with your network…"
                     value={text}
-                    onChange={handleTextChange}
+                    onChange={(e) => { setText(e.target.value); setCharCount(e.target.value.length); }}
                     disabled={posting}
-                    rows={6}
+                    rows={5}
                     maxLength={MAX_CHARS}
                     required
                   />
-                  <div className={`char-counter ${charCount > MAX_CHARS * 0.9 ? 'char-warn' : ''}`}>
-                    {charCount}/{MAX_CHARS}
+                  <div className="char-progress">
+                    <div className="char-bar" style={{ width: `${Math.min((charCount / MAX_CHARS) * 100, 100)}%`, background: charCount > MAX_CHARS * 0.9 ? 'var(--danger)' : '#0077b5' }} />
+                  </div>
+                  <div className={`char-count ${charCount > MAX_CHARS * 0.9 ? 'char-warn' : ''}`}>
+                    {charCount} / {MAX_CHARS}
                   </div>
                 </div>
               </div>
-
-              {postError && <div className="li-error">⚠️ {postError}</div>}
-
-              <button
-                type="submit"
-                className="li-btn li-btn-primary submit-post-btn"
-                disabled={posting || !text.trim()}
-              >
-                {posting ? (
-                  <><span className="li-spinner" /> Publishing…</>
-                ) : (
-                  '🔵 Publish to LinkedIn'
-                )}
+              {postError && <div className="banner banner-error" style={{ marginTop: 12 }}>⚠️ {postError}</div>}
+              <button type="submit" className="btn btn-primary li-post-btn" disabled={posting || !text.trim()}>
+                {posting ? <span className="spinner" /> : '🔵 Publish to LinkedIn'}
               </button>
             </form>
           </div>
         )}
 
-        {/* Posts List */}
+        {/* Posts */}
         {status.connected && (
-          <div className="li-card posts-card">
-            <div className="card-section-title">
-              My Posts
-              <span className="posts-count">{posts.length}</span>
+          <div className="posts-container">
+            <div className="section-title-row">
+              <div className="section-title" style={{ margin: 0 }}>My Posts</div>
+              <div className="posts-count-badge">{posts.length}</div>
             </div>
 
             {loadingPosts ? (
-              <div className="posts-loading">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="post-skeleton">
-                    <div className="li-skeleton" style={{ height: 16, width: '70%' }} />
-                    <div className="li-skeleton" style={{ height: 13, width: '50%', marginTop: 8 }} />
-                  </div>
-                ))}
+              <div className="posts-list">
+                <div className="skeleton" style={{ height: 120 }} />
+                <div className="skeleton" style={{ height: 120 }} />
               </div>
             ) : posts.length === 0 ? (
-              <div className="posts-empty">
-                <span className="posts-empty-icon">💼</span>
+              <div className="glass empty-state">
+                <span className="empty-icon">💼</span>
                 <p>No posts yet. Share something with your network above!</p>
               </div>
             ) : (
@@ -317,65 +253,48 @@ export default function LinkedIn() {
                 {posts.map((post) => {
                   const isEditing = editingId === post.id;
                   return (
-                    <div key={post.id} className={`post-item${isEditing ? ' editing' : ''}`}>
-                      <div className="post-top">
-                        <div className="post-author-row">
-                          <div className="post-avatar">{initials(status.name)}</div>
+                    <div key={post.id} className="glass post-card">
+                      <div className="post-header">
+                        <div className="post-author">
+                          <div className="post-author-avatar li-avatar">{initials(status.name)}</div>
                           <div>
                             <div className="post-author-name">{status.name}</div>
                             <div className="post-date">{formatDate(post.createdAt)}</div>
                           </div>
                         </div>
-                        <div className="post-actions">
-                          {!isEditing && (
-                            <>
-                              <button className="icon-btn edit-btn" onClick={() => startEdit(post)} title="Edit post">✏️</button>
-                              <button className="icon-btn delete-btn" onClick={() => handleDelete(post.id)} title="Delete post">🗑️</button>
-                            </>
-                          )}
-                        </div>
+                        {!isEditing && (
+                          <div className="post-actions-top">
+                            <button className="icon-btn" onClick={() => startEdit(post)} title="Edit">✏️</button>
+                            <button className="icon-btn icon-btn-danger" onClick={() => handleDelete(post.id)} title="Delete">🗑️</button>
+                          </div>
+                        )}
                       </div>
 
                       {isEditing ? (
-                        <div className="edit-area">
+                        <div className="post-edit-area">
                           <textarea
-                            className="li-textarea edit-textarea"
+                            className="sp-textarea"
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
-                            rows={5}
+                            rows={4}
                             autoFocus
                             maxLength={MAX_CHARS}
                           />
-                          <div className="edit-btns">
-                            <button
-                              className="li-btn li-btn-primary small-btn"
-                              onClick={() => saveEdit(post.id)}
-                              disabled={savingEdit || !editText.trim()}
-                            >
+                          <div className="post-edit-btns">
+                            <button className="btn btn-primary btn-sm" onClick={() => saveEdit(post.id)} disabled={savingEdit || !editText.trim()}>
                               {savingEdit ? 'Saving…' : 'Save'}
                             </button>
-                            <button
-                              className="li-btn li-btn-ghost small-btn"
-                              onClick={cancelEdit}
-                              disabled={savingEdit}
-                            >
-                              Cancel
-                            </button>
+                            <button className="btn btn-ghost btn-sm" onClick={cancelEdit} disabled={savingEdit}>Cancel</button>
                           </div>
                         </div>
                       ) : (
-                        <p className="post-body">{post.content}</p>
+                        <div className="post-body">{post.content}</div>
                       )}
 
-                      <div className="post-meta">
-                        <span className={`status-chip status-${post.status}`}>{post.status}</span>
+                      <div className="post-footer">
+                        <span className={`chip post-status chip-default`}>{post.status}</span>
                         {post.externalPostId && (
-                          <a
-                            href={`https://www.linkedin.com/feed/update/${post.externalPostId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="li-link"
-                          >
+                          <a href={`https://www.linkedin.com/feed/update/${post.externalPostId}`} target="_blank" rel="noopener noreferrer" className="post-link">
                             View on LinkedIn ↗
                           </a>
                         )}
