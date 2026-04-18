@@ -13,8 +13,8 @@ const ATTITUDES = [
 ];
 
 const LOADING_STEPS = [
-    'Scraping Google trends…',
-    'Scraping Facebook posts…',
+    'Scraping YouTube videos & comments…',
+    'Analysing scraped data…',
     'Generating post with AI…',
     'Creating image…',
 ];
