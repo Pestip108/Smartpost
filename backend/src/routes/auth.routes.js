@@ -15,5 +15,6 @@ router.post("/signup", authController.signup);
 router.post("/verify-email", authController.verifyEmail);
 router.post("/resend-code", resendCodeLimiter, authController.resendCode);
 router.post("/login", authController.login);
+router.post("/google", authController.googleAuth);
 
 module.exports = router;
