@@ -1,7 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const { OAuth2Client } = require("google-auth-library");
 const prisma = require("../prisma/client");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -239,9 +242,97 @@ const login = async (req, res) => {
     }
 };
 
+const googleAuth = async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).json({ message: "Google token is required" });
+        }
+
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const email = payload.email;
+
+        if (!email) {
+            return res.status(400).json({ message: "Invalid Google token (no email)" });
+        }
+
+        let user = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            // New user trying to sign up with Google - enforce 2FA/verification code
+            const dummyPassword = await bcrypt.hash(Math.random().toString(36).slice(-10) + Date.now().toString(), 10);
+            
+            const code = generateCode();
+            const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+            await prisma.emailVerification.upsert({
+                where: { email },
+                create: {
+                    email,
+                    password: dummyPassword,
+                    code,
+                    expiresAt,
+                    attempts: 0,
+                },
+                update: {
+                    password: dummyPassword,
+                    code,
+                    expiresAt,
+                    attempts: 0,
+                },
+            });
+
+            // Send code via email
+            const mailOptions = {
+                from: `"Smartpost Auth" <${process.env.SMTP_USER}>`,
+                to: email,
+                subject: "Your Verification Code (Google Link)",
+                text: `Your verification code is: ${code}. It will expire in 15 minutes.`,
+                html: `<h3>Welcome to Smartpost</h3><p>Your verification code is: <strong>${code}</strong></p><p>It will expire in 15 minutes.</p>`,
+            };
+
+            if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+                await transporter.sendMail(mailOptions);
+            }
+
+            return res.status(200).json({ 
+                requiresVerification: true, 
+                message: "Verification code sent to email",
+                email: email
+            });
+        }
+
+        const serviceToken = jwt.sign(
+            { userId: user.id.toString(), email: user.email, role: user.role },
+            process.env.JWT_SECRET || "fallback_secret",
+            { expiresIn: "7d" }
+        );
+
+        res.status(200).json({
+            message: "Google Login successful",
+            token: serviceToken,
+            user: {
+                id: user.id.toString(),
+                email: user.email,
+                role: user.role,
+            }
+        });
+    } catch (error) {
+        console.error("Google Auth error:", error);
+        res.status(500).json({ message: "Internal server error during Google Authentication" });
+    }
+};
+
 module.exports = {
     signup,
     verifyEmail,
     resendCode,
     login,
+    googleAuth,
 };
