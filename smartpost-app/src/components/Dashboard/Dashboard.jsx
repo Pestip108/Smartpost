@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Sparkles, CalendarDays, Briefcase, MessageCircle, Bot, Radio, Theater, Timer, Zap, Lightbulb, Link2, RefreshCw } from 'lucide-react';
 import './Dashboard.css';
 
 const FEATURES = [
   {
     id: 'generate',
     to: '/generate',
-    icon: '✨',
+    icon: <Sparkles size={22} />,
     title: 'AI Post Generator',
     desc: 'Enter a topic and let AI craft the perfect social media post — with optional AI-generated images.',
     badge: 'Powered by AI',
@@ -15,7 +16,7 @@ const FEATURES = [
   {
     id: 'schedule',
     to: '/schedule',
-    icon: '🗓',
+    icon: <CalendarDays size={22} />,
     title: 'Post Scheduler',
     desc: 'Set a recurring schedule and have fresh AI-generated posts delivered automatically to your feeds.',
     badge: 'Recurring',
@@ -24,7 +25,7 @@ const FEATURES = [
   {
     id: 'linkedin',
     to: '/linkedin',
-    icon: '💼',
+    icon: <Briefcase size={22} />,
     title: 'LinkedIn',
     desc: 'Connect your LinkedIn account and publish professional posts directly from Smartpost.',
     badge: 'Connected',
@@ -33,7 +34,7 @@ const FEATURES = [
   {
     id: 'reddit',
     to: '/reddit',
-    icon: '🟠',
+    icon: <MessageCircle size={22} />,
     title: 'Reddit',
     desc: 'Post to any subreddit in seconds. Edit or delete posts right from your dashboard.',
     badge: 'Live posting',
@@ -42,10 +43,10 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { label: 'AI Models', value: '3+',    icon: '🤖' },
-  { label: 'Platforms',  value: '2',    icon: '📡' },
-  { label: 'Post Tones', value: '4',    icon: '🎭' },
-  { label: 'Schedule Intervals', value: '8', icon: '⏱' },
+  { label: 'AI Models', value: '3+',    icon: <Bot size={18} /> },
+  { label: 'Platforms',  value: '2',    icon: <Radio size={18} /> },
+  { label: 'Post Tones', value: '4',    icon: <Theater size={18} /> },
+  { label: 'Schedule Intervals', value: '8', icon: <Timer size={18} /> },
 ];
 
 export default function Dashboard() {
@@ -59,7 +60,7 @@ export default function Dashboard() {
       {/* Hero section */}
       <section className="dash-hero">
         <div className="dash-hero-badge">
-          <span>⚡</span> AI-Powered Social Media
+          <Zap size={14} /> AI-Powered Social Media
         </div>
         <h1 className="dash-hero-title">
           Welcome back,<br />
@@ -70,10 +71,10 @@ export default function Dashboard() {
         </p>
         <div className="dash-hero-actions">
           <Link to="/generate" className="btn btn-primary dash-cta">
-            ✨ Generate a Post
+            <Sparkles size={16} /> Generate a Post
           </Link>
           <Link to="/schedule" className="btn btn-ghost dash-cta-ghost">
-            🗓 Schedule Posts
+            <CalendarDays size={16} /> Schedule Posts
           </Link>
         </div>
       </section>
@@ -116,21 +117,21 @@ export default function Dashboard() {
         <div className="section-title">Quick Tips</div>
         <div className="tips-list">
           <div className="tip-item">
-            <span className="tip-icon">💡</span>
+            <span className="tip-icon"><Lightbulb size={18} /></span>
             <div>
               <strong>Start with Generate</strong>
               <p>Pick a topic, choose a tone, and get a post in seconds. Then publish directly to LinkedIn.</p>
             </div>
           </div>
           <div className="tip-item">
-            <span className="tip-icon">🔗</span>
+            <span className="tip-icon"><Link2 size={18} /></span>
             <div>
               <strong>Connect your accounts</strong>
               <p>Link LinkedIn and Reddit first from their pages before scheduling or posting.</p>
             </div>
           </div>
           <div className="tip-item">
-            <span className="tip-icon">🔁</span>
+            <span className="tip-icon"><RefreshCw size={18} /></span>
             <div>
               <strong>Set it and forget it</strong>
               <p>Use the Scheduler to auto-generate and auto-post on a repeating interval.</p>

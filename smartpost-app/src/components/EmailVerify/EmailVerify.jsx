@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Mail } from 'lucide-react';
 import './EmailVerify.css';
 
 const EmailVerify = () => {
@@ -108,7 +109,7 @@ const EmailVerify = () => {
                 {/* Animated envelope icon */}
                 <div className="verify-icon-wrap">
                     <div className="verify-icon-ring" />
-                    <span className="verify-icon">✉️</span>
+                    <span className="verify-icon"><Mail size={36} /></span>
                 </div>
 
                 <div className="verify-header">

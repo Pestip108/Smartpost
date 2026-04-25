@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { CheckCircle, XCircle, Pencil, Trash2, AlertTriangle, Send, Briefcase } from 'lucide-react';
 import './LinkedIn.css';
 
 const API = 'http://localhost:4000/api/linkedin';
@@ -60,11 +61,11 @@ export default function LinkedIn() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('connected') === 'true') {
-      showToast('✅ LinkedIn account connected!');
+      showToast(<><CheckCircle size={15} /> LinkedIn account connected!</>);
       window.history.replaceState({}, '', '/linkedin');
     }
     if (params.get('error')) {
-      showToast(`❌ Connection failed: ${params.get('error')}`);
+      showToast(<><XCircle size={15} /> Connection failed: {params.get('error')}</>);
       window.history.replaceState({}, '', '/linkedin');
     }
     fetchStatus();
@@ -77,7 +78,7 @@ export default function LinkedIn() {
 
   const handleConnect = () => {
     const token = localStorage.getItem('token');
-    if (!token) return showToast('❌ You must be logged in to connect LinkedIn.');
+    if (!token) return showToast(<><XCircle size={15} /> You must be logged in to connect LinkedIn.</>);
     window.location.href = `${API}/login?token=${encodeURIComponent(token)}`;
   };
 
@@ -106,7 +107,7 @@ export default function LinkedIn() {
       setText('');
       setCharCount(0);
       fetchPosts();
-      showToast('🔵 Post published to LinkedIn!');
+      showToast(<><Send size={14} /> Post published to LinkedIn!</>);
     } catch (err) {
       setPostError(err.response?.data?.message || 'Failed to post.');
     } finally {
@@ -122,7 +123,7 @@ export default function LinkedIn() {
     try {
       setSavingEdit(true);
       await axios.patch(`${API}/post/${postId}`, { text: editText.trim() }, { headers: authHeaders() });
-      showToast('✏️ Post updated!');
+      showToast(<><CheckCircle size={14} /> Post updated!</>);
       setEditingId(null);
       setEditText('');
       fetchPosts();
@@ -138,7 +139,7 @@ export default function LinkedIn() {
     try {
       await axios.delete(`${API}/post/${postId}`, { headers: authHeaders() });
       setPosts((prev) => prev.filter((p) => p.id !== postId));
-      showToast('🗑️ Post deleted.');
+      showToast(<><Trash2 size={14} /> Post deleted.</>);
     } catch (err) {
       showToast('❌ ' + (err.response?.data?.message || 'Failed to delete'));
     }
@@ -222,9 +223,9 @@ export default function LinkedIn() {
                   </div>
                 </div>
               </div>
-              {postError && <div className="banner banner-error" style={{ marginTop: 12 }}>⚠️ {postError}</div>}
+              {postError && <div className="banner banner-error" style={{ marginTop: 12 }}><AlertTriangle size={15} /> {postError}</div>}
               <button type="submit" className="btn btn-primary li-post-btn" disabled={posting || !text.trim()}>
-                {posting ? <span className="spinner" /> : '🔵 Publish to LinkedIn'}
+                {posting ? <span className="spinner" /> : <><Send size={15} /> Publish to LinkedIn</>}
               </button>
             </form>
           </div>
@@ -245,7 +246,7 @@ export default function LinkedIn() {
               </div>
             ) : posts.length === 0 ? (
               <div className="glass empty-state">
-                <span className="empty-icon">💼</span>
+                <span className="empty-icon"><Briefcase size={32} /></span>
                 <p>No posts yet. Share something with your network above!</p>
               </div>
             ) : (
@@ -264,8 +265,8 @@ export default function LinkedIn() {
                         </div>
                         {!isEditing && (
                           <div className="post-actions-top">
-                            <button className="icon-btn" onClick={() => startEdit(post)} title="Edit">✏️</button>
-                            <button className="icon-btn icon-btn-danger" onClick={() => handleDelete(post.id)} title="Delete">🗑️</button>
+                            <button className="icon-btn" onClick={() => startEdit(post)} title="Edit"><Pencil size={15} /></button>
+                            <button className="icon-btn icon-btn-danger" onClick={() => handleDelete(post.id)} title="Delete"><Trash2 size={15} /></button>
                           </div>
                         )}
                       </div>
