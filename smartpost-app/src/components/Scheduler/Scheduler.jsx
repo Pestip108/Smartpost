@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { CalendarDays, Scale, Briefcase, Smile, Flame, CheckCircle, Link2, Clock, RefreshCw, Inbox } from 'lucide-react';
 import './Scheduler.css';
 
 const API_URL = 'http://localhost:4000/api/scheduler';
 
 const ATTITUDES = [
-    { value: 'Neutral', emoji: '⚖️', label: 'Neutral' },
-    { value: 'Professional', emoji: '💼', label: 'Professional' },
-    { value: 'Casual', emoji: '😊', label: 'Casual' },
-    { value: 'Viral', emoji: '🔥', label: 'Viral' },
+    { value: 'Neutral', icon: <Scale size={15} />, label: 'Neutral' },
+    { value: 'Professional', icon: <Briefcase size={15} />, label: 'Professional' },
+    { value: 'Casual', icon: <Smile size={15} />, label: 'Casual' },
+    { value: 'Viral', icon: <Flame size={15} />, label: 'Viral' },
 ];
 
 const INTERVAL_OPTIONS = [
@@ -98,7 +99,7 @@ export default function Scheduler() {
                 },
                 { headers: authHeaders() }
             );
-            setSuccess('✅ Scheduled! Your post will be generated automatically.');
+            setSuccess(<><CheckCircle size={15} /> Scheduled! Your post will be generated automatically.</>);
             setTopic('');
             await fetchTasks();
         } catch (err) {
@@ -123,7 +124,7 @@ export default function Scheduler() {
             <Link to="/" className="back-link">← Back to Dashboard</Link>
 
             <div className="page-header">
-                <span className="page-header-icon">🗓</span>
+                <span className="page-header-icon"><CalendarDays size={28} /></span>
                 <div>
                     <h1 className="page-title">Post Scheduler</h1>
                     <p className="page-subtitle">Set a topic once, get AI-generated posts delivered on a recurring schedule.</p>
@@ -151,7 +152,7 @@ export default function Scheduler() {
                     <div className="form-group">
                         <span className="sp-label">Tone / Attitude</span>
                         <div className="pill-group">
-                            {ATTITUDES.map(({ value, emoji, label }) => (
+                            {ATTITUDES.map(({ value, icon, label }) => (
                                 <React.Fragment key={value}>
                                     <input
                                         type="radio"
@@ -164,7 +165,7 @@ export default function Scheduler() {
                                         disabled={submitting}
                                     />
                                     <label htmlFor={`sch-att-${value}`} className="pill-label">
-                                        <span>{emoji}</span> {label}
+                                        <span>{icon}</span> {label}
                                     </label>
                                 </React.Fragment>
                             ))}
@@ -227,7 +228,7 @@ export default function Scheduler() {
                                 <span className="toggle-track" />
                             </label>
                             <span className="toggle-label">
-                                🔵 Auto-publish LinkedIn
+                                <Link2 size={15} /> Auto-publish LinkedIn
                                 {!linkedinStatus.connected && <small>(not connected)</small>}
                             </span>
                         </div>
@@ -237,7 +238,7 @@ export default function Scheduler() {
                     {success && <div className="banner banner-success">{success}</div>}
 
                     <button type="submit" className="btn btn-primary btn-full" disabled={submitting || !topic.trim()}>
-                        {submitting ? <span className="spinner" /> : '🗓 Schedule Post Generator'}
+                        {submitting ? <span className="spinner" /> : <><CalendarDays size={16} /> Schedule Post Generator</>}
                     </button>
                 </form>
 
@@ -252,7 +253,7 @@ export default function Scheduler() {
                         </div>
                     ) : tasks.length === 0 ? (
                         <div className="glass sch-empty">
-                            <span className="sch-empty-icon">📭</span>
+                            <span className="sch-empty-icon"><Inbox size={36} /></span>
                             <p>No active schedules yet. Create one to automate your posts!</p>
                         </div>
                     ) : (
@@ -263,9 +264,9 @@ export default function Scheduler() {
                                     <div className="task-body">
                                         <div className="task-topic" title={task.topic}>{task.topic}</div>
                                         <div className="task-meta">
-                                            <span className="chip chip-blue">🕒 Next: {formatDate(task.nextExecution)}</span>
-                                            <span className="chip chip-default">🔁 Every {task.intervalHours}h</span>
-                                            {task.publishLinkedIn && <span className="chip chip-default" style={{ borderColor: 'var(--primary-light)', color: 'var(--primary-light)' }}>🔵 LinkedIn</span>}
+                                            <span className="chip chip-blue"><Clock size={13} /> Next: {formatDate(task.nextExecution)}</span>
+                                            <span className="chip chip-default"><RefreshCw size={13} /> Every {task.intervalHours}h</span>
+                                            {task.publishLinkedIn && <span className="chip chip-default" style={{ borderColor: 'var(--primary-light)', color: 'var(--primary-light)' }}><Link2 size={13} /> LinkedIn</span>}
                                         </div>
                                     </div>
                                     <button

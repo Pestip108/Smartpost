@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { CheckCircle, XCircle, Pencil, Trash2, AlertTriangle, Send, Inbox } from 'lucide-react';
 import '../LinkedIn/LinkedIn.css'; // Shares social layout styles
 
 const API = 'http://localhost:4000/api/reddit';
@@ -51,8 +52,8 @@ export default function Reddit() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('connected') === 'true') { showToast('✅ Reddit account connected!'); window.history.replaceState({}, '', '/reddit'); }
-    if (params.get('error')) { showToast(`❌ Connection failed: ${params.get('error')}`); window.history.replaceState({}, '', '/reddit'); }
+    if (params.get('connected') === 'true') { showToast(<><CheckCircle size={15} /> Reddit account connected!</>); window.history.replaceState({}, '', '/reddit'); }
+    if (params.get('error')) { showToast(<><XCircle size={15} /> Connection failed: {params.get('error')}</>); window.history.replaceState({}, '', '/reddit'); }
     fetchStatus();
   }, [fetchStatus]);
 
@@ -62,7 +63,7 @@ export default function Reddit() {
 
   const handleConnect = () => {
     const token = localStorage.getItem('token');
-    if (!token) return showToast('❌ You must be logged in to connect Reddit.');
+    if (!token) return showToast(<><XCircle size={15} /> You must be logged in to connect Reddit.</>);
     window.location.href = `${API}/login?token=${encodeURIComponent(token)}`;
   };
 
@@ -89,7 +90,7 @@ export default function Reddit() {
       setTimeout(() => setPostSuccess(''), 4000);
       setSubreddit(''); setTitle(''); setBody('');
       fetchPosts();
-      showToast('🟠 Post submitted to Reddit!');
+      showToast(<><Send size={14} /> Post submitted to Reddit!</>);
     } catch (err) {
       setPostError(err.response?.data?.message || 'Failed to post.');
     } finally { setPosting(false); }
@@ -107,7 +108,7 @@ export default function Reddit() {
     try {
       setSavingEdit(true);
       await axios.patch(`${API}/post/${postId}`, { text: editText.trim() }, { headers: authHeaders() });
-      showToast('✏️ Post updated!');
+      showToast(<><CheckCircle size={14} /> Post updated!</>);
       setEditingId(null); setEditText('');
       fetchPosts();
     } catch (err) { showToast('❌ Failed to edit'); } finally { setSavingEdit(false); }
@@ -118,7 +119,7 @@ export default function Reddit() {
     try {
       await axios.delete(`${API}/post/${postId}`, { headers: authHeaders() });
       setPosts((prev) => prev.filter((p) => p.id !== postId));
-      showToast('🗑️ Post deleted.');
+      showToast(<><Trash2 size={14} /> Post deleted.</>);
     } catch (err) { showToast('❌ Failed to delete'); }
   };
 
@@ -216,11 +217,11 @@ export default function Reddit() {
                 />
               </div>
 
-              {postError && <div className="banner banner-error" style={{ marginTop: 16 }}>⚠️ {postError}</div>}
-              {postSuccess && <div className="banner banner-success" style={{ marginTop: 16 }}>✅ {postSuccess}</div>}
+              {postError && <div className="banner banner-error" style={{ marginTop: 16 }}><AlertTriangle size={15} /> {postError}</div>}
+              {postSuccess && <div className="banner banner-success" style={{ marginTop: 16 }}><CheckCircle size={15} /> {postSuccess}</div>}
 
               <button type="submit" className="btn btn-primary reddit-post-btn" style={{ background: '#ff4500' }} disabled={posting || !subreddit.trim() || !title.trim()}>
-                {posting ? <span className="spinner" /> : '🟠 Post to Reddit'}
+                {posting ? <span className="spinner" /> : <><Send size={15} /> Post to Reddit</>}
               </button>
             </form>
           </div>
@@ -241,7 +242,7 @@ export default function Reddit() {
               </div>
             ) : posts.length === 0 ? (
               <div className="glass empty-state">
-                <span className="empty-icon">📭</span>
+                <span className="empty-icon"><Inbox size={32} /></span>
                 <p>No posts yet. Create your first Reddit post above!</p>
               </div>
             ) : (
@@ -261,8 +262,8 @@ export default function Reddit() {
                         </div>
                         {!isEditing && (
                           <div className="post-actions-top">
-                            <button className="icon-btn" onClick={() => startEdit(post)} title="Edit">✏️</button>
-                            <button className="icon-btn icon-btn-danger" onClick={() => handleDelete(post.id)} title="Delete">🗑️</button>
+                            <button className="icon-btn" onClick={() => startEdit(post)} title="Edit"><Pencil size={15} /></button>
+                            <button className="icon-btn icon-btn-danger" onClick={() => handleDelete(post.id)} title="Delete"><Trash2 size={15} /></button>
                           </div>
                         )}
                       </div>

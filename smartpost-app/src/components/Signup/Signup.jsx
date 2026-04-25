@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
+import { Eye, EyeOff, Zap } from 'lucide-react';
 import './Signup.css';
 
 const Signup = () => {
@@ -71,7 +72,7 @@ const Signup = () => {
             <div className="auth-branding signup-branding">
                 <div className="auth-branding-inner">
                     <div className="auth-brand-logo">
-                        <span className="auth-brand-icon">⚡</span>
+                        <span className="auth-brand-icon"><Zap size={22} /></span>
                         <span className="auth-brand-name">Smartpost</span>
                     </div>
                     <h2 className="auth-brand-headline">
@@ -137,7 +138,7 @@ const Signup = () => {
                                     onClick={() => setShowPassword(s => !s)}
                                     tabIndex={-1}
                                 >
-                                    {showPassword ? '🙈' : '👁'}
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
                             {password && (
