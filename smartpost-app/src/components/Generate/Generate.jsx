@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Sparkles, Briefcase, Scale, Smile, Flame, ClipboardCopy, CheckCircle, Send, Radio, Theater, Cpu } from 'lucide-react';
 import './Generate.css';
 
 const API_URL = 'http://localhost:4000/api/generate';
 
 const ATTITUDES = [
-    { value: 'Neutral', emoji: '⚖️', label: 'Neutral' },
-    { value: 'Professional', emoji: '💼', label: 'Professional' },
-    { value: 'Casual', emoji: '😊', label: 'Casual' },
-    { value: 'Viral', emoji: '🔥', label: 'Viral' },
+    { value: 'Neutral', icon: <Scale size={15} />, label: 'Neutral' },
+    { value: 'Professional', icon: <Briefcase size={15} />, label: 'Professional' },
+    { value: 'Casual', icon: <Smile size={15} />, label: 'Casual' },
+    { value: 'Viral', icon: <Flame size={15} />, label: 'Viral' },
 ];
 
 const LOADING_STEPS = [
@@ -143,7 +144,7 @@ export default function Generate() {
 
             <div className="section-title-row">
                 <div className="page-header">
-                    <span className="page-header-icon">✨</span>
+                    <span className="page-header-icon"><Sparkles size={28} /></span>
                     <div>
                         <h1 className="page-title">AI Post Generator</h1>
                         <p className="page-subtitle">Describe your topic and let AI craft the perfect social media post.</p>
@@ -171,7 +172,7 @@ export default function Generate() {
                     <div className="form-group">
                         <span className="sp-label">Tone / Attitude</span>
                         <div className="pill-group">
-                            {ATTITUDES.map(({ value, emoji, label }) => (
+                            {ATTITUDES.map(({ value, icon, label }) => (
                                 <React.Fragment key={value}>
                                     <input
                                         type="radio"
@@ -184,7 +185,7 @@ export default function Generate() {
                                         disabled={loading}
                                     />
                                     <label htmlFor={`att-${value}`} className="pill-label">
-                                        <span>{emoji}</span> {label}
+                                        <span>{icon}</span> {label}
                                     </label>
                                 </React.Fragment>
                             ))}
@@ -208,7 +209,7 @@ export default function Generate() {
                     </div>
 
                     <button type="submit" className="btn btn-primary btn-full" disabled={loading || !prompt.trim()}>
-                        ✨ Generate Post
+                        <Sparkles size={16} /> Generate Post
                     </button>
                 </form>
             )}
@@ -217,7 +218,7 @@ export default function Generate() {
             {loading && (
                 <div className="glass loading-card">
                     <div className="loading-orbit">
-                        <div className="orbit-center">🧠</div>
+                        <div className="orbit-center"><Cpu size={28} /></div>
                         <div className="orbit-ring" />
                         <div className="orbit-ring orbit-ring-2" />
                         <div className="orbit-dot" />
@@ -251,8 +252,8 @@ export default function Generate() {
                     <div className="result-header">
                         <h2 className="result-title">Generated Post</h2>
                         <div className="result-badges">
-                            <span className="chip chip-default">📡 {result.scrapedCount ?? 0} sources</span>
-                            <span className="chip chip-default">🎭 {attitude}</span>
+                            <span className="chip chip-default"><Radio size={13} /> {result.scrapedCount ?? 0} sources</span>
+                            <span className="chip chip-default"><Theater size={13} /> {attitude}</span>
                         </div>
                     </div>
 
@@ -267,11 +268,11 @@ export default function Generate() {
                     )}
 
                     {error && <div className="banner banner-error">{error}</div>}
-                    {publishSuccess && <div className="banner banner-success">✅ {publishSuccess}</div>}
+                    {publishSuccess && <div className="banner banner-success"><CheckCircle size={15} /> {publishSuccess}</div>}
 
                     <div className="result-actions">
                         <button className="btn btn-ghost" onClick={handleCopy}>
-                            {copied ? '✓ Copied!' : '📋 Copy Post'}
+                            {copied ? <><CheckCircle size={15} /> Copied!</> : <><ClipboardCopy size={15} /> Copy Post</>}
                         </button>
                         {linkedinStatus.connected && (
                             <button
@@ -279,7 +280,7 @@ export default function Generate() {
                                 onClick={handlePublishToLinkedIn}
                                 disabled={publishing}
                             >
-                                {publishing ? <span className="spinner" /> : '🔵 Publish to LinkedIn'}
+                                {publishing ? <span className="spinner" /> : <><Send size={15} /> Publish to LinkedIn</>}
                             </button>
                         )}
                         <div style={{ flex: 1 }} />

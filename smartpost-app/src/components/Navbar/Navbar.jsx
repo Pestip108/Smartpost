@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../App';
+import { LayoutDashboard, Sparkles, CalendarDays, ExternalLink, MessageCircle, Zap } from 'lucide-react';
 import './Navbar.css';
 
 const NAV_LINKS = [
-  { to: '/',         label: 'Dashboard', icon: '⬡' },
-  { to: '/generate', label: 'Generate',  icon: '✨' },
-  { to: '/schedule', label: 'Schedule',  icon: '🗓' },
-  { to: '/linkedin', label: 'LinkedIn',  icon: '🔵' },
-  { to: '/reddit',   label: 'Reddit',    icon: '🟠' },
+  { to: '/',         label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+  { to: '/generate', label: 'Generate',  icon: <Sparkles size={16} /> },
+  { to: '/schedule', label: 'Schedule',  icon: <CalendarDays size={16} /> },
+  { to: '/linkedin', label: 'LinkedIn',  icon: <ExternalLink size={16} /> },
+  { to: '/reddit',   label: 'Reddit',    icon: <MessageCircle size={16} /> },
 ];
 
 function SunIcon() {
@@ -84,7 +85,7 @@ export default function Navbar() {
       <nav className={`navbar${scrolled ? ' navbar-scrolled' : ''}`}>
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <span className="navbar-logo-icon">⚡</span>
+          <span className="navbar-logo-icon"><Zap size={20} /></span>
           <span className="navbar-logo-text">Smartpost</span>
         </Link>
 

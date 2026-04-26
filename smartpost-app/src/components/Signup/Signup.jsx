@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { GoogleLogin } from '@react-oauth/google';
+import { Eye, EyeOff, Zap } from 'lucide-react';
 import './Signup.css';
 
 const Signup = () => {
@@ -43,13 +45,34 @@ const Signup = () => {
         }
     };
 
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setError('');
+        setIsLoading(true);
+        try {
+            const response = await axios.post('http://localhost:4000/api/auth/google', { token: credentialResponse.credential });
+            
+            if (response.data.requiresVerification) {
+                navigate('/verify-email', { state: { email: response.data.email } });
+                return;
+            }
+
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            navigate('/');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to authenticate with Google.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="auth-page">
             {/* Left branding panel */}
             <div className="auth-branding signup-branding">
                 <div className="auth-branding-inner">
                     <div className="auth-brand-logo">
-                        <span className="auth-brand-icon">⚡</span>
+                        <span className="auth-brand-icon"><Zap size={22} /></span>
                         <span className="auth-brand-name">Smartpost</span>
                     </div>
                     <h2 className="auth-brand-headline">
@@ -115,7 +138,7 @@ const Signup = () => {
                                     onClick={() => setShowPassword(s => !s)}
                                     tabIndex={-1}
                                 >
-                                    {showPassword ? '🙈' : '👁'}
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
                             {password && (
@@ -159,6 +182,20 @@ const Signup = () => {
                             {isLoading ? <span className="auth-spinner" /> : 'Create Account'}
                         </button>
                     </form>
+
+                    <div className="auth-divider">
+                        <span>or continue with</span>
+                    </div>
+
+                    <div className="auth-social-wrap">
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => setError('Google signup failed. Please try again.')}
+                            theme="filled_black"
+                            shape="pill"
+                            text="signup_with"
+                        />
+                    </div>
 
                     <p className="auth-switch">
                         Already have an account? <Link to="/login" className="auth-switch-link">Sign in</Link>
