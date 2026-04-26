@@ -14,8 +14,8 @@ const ATTITUDES = [
 ];
 
 const LOADING_STEPS = [
-    'Scraping Google trends…',
-    'Scraping Facebook posts…',
+    'Scraping YouTube videos & comments…',
+    'Analysing scraped data…',
     'Generating post with AI…',
     'Creating image…',
 ];
@@ -87,7 +87,7 @@ export default function Generate() {
                 attitude,
                 includeImage,
             }, {
-                timeout: 120_000,
+                timeout: 180_000,
                 headers: { Authorization: token ? `Bearer ${token}` : '' }
             });
             setResult(data);

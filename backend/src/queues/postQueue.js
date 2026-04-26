@@ -88,14 +88,14 @@ function startWorker() {
                 `[BullMQ] Processing job ${job.id} for task ${scheduledTaskId}`
             );
 
-            // 1. Run google scraper
-            const googleData = await runPython("google_scrape.py", [topic, attitude]);
+            // 1. Run YouTube scraper
+            const youtubeData = await runPython("youtube_scraper.py", [topic, attitude]);
 
             // 2. Call webhook to generate post text
             const postRes = await fetch(process.env.GOOGLE_SCRAPER_WEBHOOK_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(googleData),
+                body: JSON.stringify(youtubeData),
             });
             const postData = await postRes.json();
 
@@ -195,7 +195,7 @@ function startWorker() {
                 data: {
                     postId: dbPost.id,
                     topic,
-                    generatedReport: JSON.stringify(googleData),
+                    generatedReport: JSON.stringify(youtubeData),
                 },
             });
 

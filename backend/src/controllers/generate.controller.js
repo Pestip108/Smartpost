@@ -60,9 +60,9 @@ exports.generate = async (req, res) => {
     const userId = BigInt(req.user.userId);
 
     try {
-        // 1. Run scrapers in parallel (Google is primary; Facebook optional)
+        // 1. Run scrapers in parallel (YouTube is primary; Facebook optional)
         const scraperPromises = [
-            runPython("google_scrape.py", [sanitizedPrompt, attitude]),
+            runPython("youtube_scraper.py", [sanitizedPrompt, attitude]),
         ];
 
         // // Optionally also run facebook (may fail if no session)
@@ -74,16 +74,16 @@ exports.generate = async (req, res) => {
         //     }))
         // );
 
-        const [googleData] = await Promise.all(scraperPromises);
+        const [youtubeData] = await Promise.all(scraperPromises);
 
-        console.log(googleData);
+        console.log(youtubeData);
 
         const postRes = await fetch(process.env.GOOGLE_SCRAPER_WEBHOOK_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(googleData)
+            body: JSON.stringify(youtubeData)
         });
 
         const postData = await postRes.json();
@@ -153,7 +153,7 @@ exports.generate = async (req, res) => {
             data: {
                 postId: post.id,
                 topic: sanitizedPrompt,
-                generatedReport: JSON.stringify(googleData),
+                generatedReport: JSON.stringify(youtubeData),
             }
         });
 
@@ -161,9 +161,9 @@ exports.generate = async (req, res) => {
             post: postData.output,
             imageUrl,
             imageFilename,
-            scrapedCount: googleData.array?.length,
+            scrapedCount: youtubeData.array?.length,
             sources: {
-                google: googleData.array?.length ?? 0,
+                youtube: youtubeData.array?.length ?? 0,
                 // facebook: facebookData.array?.length ?? 0,
             },
         });
