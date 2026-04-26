@@ -87,7 +87,7 @@ export default function Generate() {
                 attitude,
                 includeImage,
             }, {
-                timeout: 120_000,
+                timeout: 180_000,
                 headers: { Authorization: token ? `Bearer ${token}` : '' }
             });
             setResult(data);
