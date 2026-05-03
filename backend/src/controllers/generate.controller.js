@@ -74,16 +74,17 @@ exports.generate = async (req, res) => {
         //     }))
         // );
 
-        const [youtubeData] = await Promise.all(scraperPromises);
+        //const [youtubeData] = await Promise.all(scraperPromises);
 
-        console.log(youtubeData);
+        //console.log(youtubeData);
 
         const postRes = await fetch(process.env.GOOGLE_SCRAPER_WEBHOOK_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(youtubeData)
+            body: JSON.stringify({prompt: sanitizedPrompt,
+                                  attitude: attitude})
         });
 
         const postData = await postRes.json();
