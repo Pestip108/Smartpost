@@ -18,7 +18,7 @@ const Login = () => {
         setError('');
         setIsLoading(true);
         try {
-            const response = await axios.post('http://localhost:4000/api/auth/login', { email, password });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
             navigate('/');
@@ -33,7 +33,7 @@ const Login = () => {
         setError('');
         setIsLoading(true);
         try {
-            const response = await axios.post('http://localhost:4000/api/auth/google', { token: credentialResponse.credential });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/google`, { token: credentialResponse.credential });
             
             if (response.data.requiresVerification) {
                 navigate('/verify-email', { state: { email: response.data.email } });

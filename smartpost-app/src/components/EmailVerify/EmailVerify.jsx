@@ -63,7 +63,7 @@ const EmailVerify = () => {
         setError('');
         setIsLoading(true);
         try {
-            const response = await axios.post('http://localhost:4000/api/auth/verify-email', { email, code: fullCode });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/verify-email`, { email, code: fullCode });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
             navigate('/');
@@ -79,7 +79,7 @@ const EmailVerify = () => {
         setError('');
         setIsResending(true);
         try {
-            await axios.post('http://localhost:4000/api/auth/resend-code', { email });
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/resend-code`, { email });
             setCanResend(false);
             setResendCooldown(60);
             setTimeLeft(15 * 60);

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { CheckCircle, XCircle, Pencil, Trash2, AlertTriangle, Send, Briefcase } from 'lucide-react';
 import './LinkedIn.css';
 
-const API = 'http://localhost:4000/api/linkedin';
+const API = `${import.meta.env.VITE_API_URL}/api/linkedin`;
 
 function authHeaders() {
   const token = localStorage.getItem('token');

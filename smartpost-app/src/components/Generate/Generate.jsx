@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Sparkles, Briefcase, Scale, Smile, Flame, ClipboardCopy, CheckCircle, Send, Radio, Theater, Cpu } from 'lucide-react';
 import './Generate.css';
 
-const API_URL = 'http://localhost:4000/api/generate';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/generate`;
 
 const ATTITUDES = [
     { value: 'Neutral', icon: <Scale size={15} />, label: 'Neutral' },
@@ -41,7 +41,7 @@ export default function Generate() {
     const fetchLinkedinStatus = async () => {
         try {
             const token = localStorage.getItem('token');
-            const { data } = await axios.get('http://localhost:4000/api/linkedin/status', {
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/linkedin/status`, {
                 headers: { Authorization: token ? `Bearer ${token}` : '' }
             });
             setLinkedinStatus(data);
@@ -115,7 +115,7 @@ export default function Generate() {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:4000/api/linkedin/post', {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/linkedin/post`, {
                 text: result.post
             }, {
                 headers: { Authorization: token ? `Bearer ${token}` : '' }
@@ -263,7 +263,7 @@ export default function Generate() {
 
                     {result.imageUrl && (
                         <div className="result-image-wrap">
-                            <img src={`http://localhost:4000${result.imageUrl}`} alt="AI generated" className="result-image" />
+                            <img src={`${import.meta.env.VITE_API_URL}${result.imageUrl}`} alt="AI generated" className="result-image" />
                         </div>
                     )}
 

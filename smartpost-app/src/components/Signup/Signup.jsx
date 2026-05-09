@@ -36,7 +36,7 @@ const Signup = () => {
         if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
         setIsLoading(true);
         try {
-            await axios.post('http://localhost:4000/api/auth/signup', { email, password });
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signup`, { email, password });
             navigate('/verify-email', { state: { email } });
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to create account. Please try again.');
@@ -49,7 +49,7 @@ const Signup = () => {
         setError('');
         setIsLoading(true);
         try {
-            const response = await axios.post('http://localhost:4000/api/auth/google', { token: credentialResponse.credential });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/google`, { token: credentialResponse.credential });
             
             if (response.data.requiresVerification) {
                 navigate('/verify-email', { state: { email: response.data.email } });

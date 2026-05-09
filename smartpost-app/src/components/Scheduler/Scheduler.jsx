@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { CalendarDays, Scale, Briefcase, Smile, Flame, CheckCircle, Link2, Clock, RefreshCw, Inbox } from 'lucide-react';
 import './Scheduler.css';
 
-const API_URL = 'http://localhost:4000/api/scheduler';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/scheduler`;
 
 const ATTITUDES = [
     { value: 'Neutral', icon: <Scale size={15} />, label: 'Neutral' },
@@ -60,7 +60,7 @@ export default function Scheduler() {
 
         const fetchStatus = async () => {
             try {
-                const { data } = await axios.get('http://localhost:4000/api/linkedin/status', { headers: authHeaders() });
+                const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/linkedin/status`, { headers: authHeaders() });
                 setLinkedinStatus(data);
             } catch (err) { }
         };
