@@ -83,7 +83,7 @@ const Signup = () => {
                     </p>
                     <ul className="auth-feature-list">
                         <li><span className="feat-check">✓</span> Free to get started</li>
-                        <li><span className="feat-check">✓</span> Connect LinkedIn &amp; Reddit</li>
+                        <li><span className="feat-check">✓</span> Connect LinkedIn</li>
                         <li><span className="feat-check">✓</span> Set recurring post schedules</li>
                         <li><span className="feat-check">✓</span> AI images for your posts</li>
                     </ul>

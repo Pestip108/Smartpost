@@ -63,12 +63,12 @@ const Login = () => {
                         Create posts that <span>stand out</span>
                     </h2>
                     <p className="auth-brand-sub">
-                        AI-powered social media posts for LinkedIn and Reddit — generated and scheduled automatically.
+                        AI-powered social media posts for LinkedIn — generated and scheduled automatically.
                     </p>
                     <ul className="auth-feature-list">
                         <li><span className="feat-check">✓</span> AI-generated posts in seconds</li>
                         <li><span className="feat-check">✓</span> Schedule recurring content</li>
-                        <li><span className="feat-check">✓</span> Publish directly to LinkedIn &amp; Reddit</li>
+                        <li><span className="feat-check">✓</span> Publish directly to LinkedIn</li>
                         <li><span className="feat-check">✓</span> Optional AI-generated images</li>
                     </ul>
                     <div className="auth-branding-blobs">

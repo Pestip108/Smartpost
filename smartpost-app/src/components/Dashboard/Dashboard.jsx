@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, CalendarDays, Briefcase, MessageCircle, Bot, Radio, Theater, Timer, Zap, Lightbulb, Link2, RefreshCw } from 'lucide-react';
+import { Sparkles, CalendarDays, Briefcase, Bot, Radio, Theater, Timer, Zap, Lightbulb, Link2, RefreshCw } from 'lucide-react';
 import './Dashboard.css';
 
 const FEATURES = [
@@ -31,15 +31,6 @@ const FEATURES = [
     badge: 'Connected',
     color: 'linkedin',
   },
-  {
-    id: 'reddit',
-    to: '/reddit',
-    icon: <MessageCircle size={22} />,
-    title: 'Reddit',
-    desc: 'Post to any subreddit in seconds. Edit or delete posts right from your dashboard.',
-    badge: 'Live posting',
-    color: 'reddit',
-  },
 ];
 
 const STATS = [
@@ -67,7 +58,7 @@ export default function Dashboard() {
           <span className="dash-hero-name">{firstName}</span>
         </h1>
         <p className="dash-hero-subtitle">
-          Generate, schedule, and publish AI-crafted posts to LinkedIn and Reddit — all in one place.
+          Generate, schedule, and publish AI-crafted posts to LinkedIn — all in one place.
         </p>
         <div className="dash-hero-actions">
           <Link to="/generate" className="btn btn-primary dash-cta">
@@ -127,7 +118,7 @@ export default function Dashboard() {
             <span className="tip-icon"><Link2 size={18} /></span>
             <div>
               <strong>Connect your accounts</strong>
-              <p>Link LinkedIn and Reddit first from their pages before scheduling or posting.</p>
+              <p>Link LinkedIn first from its page before scheduling or posting.</p>
             </div>
           </div>
           <div className="tip-item">

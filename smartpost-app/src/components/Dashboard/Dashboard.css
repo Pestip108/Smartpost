@@ -169,9 +169,7 @@
 .dash-card-linkedin::before{ background: linear-gradient(135deg, rgba(0,119,181,0.07), transparent); }
 .dash-card-linkedin:hover  { border-color: rgba(0,119,181,0.4); }
 
-.dash-card-reddit { border-color: rgba(255,69,0,0.2); }
-.dash-card-reddit::before  { background: linear-gradient(135deg, rgba(255,69,0,0.07), transparent); }
-.dash-card-reddit:hover    { border-color: rgba(255,69,0,0.4); }
+
 
 .dash-card-top {
   display: flex;
