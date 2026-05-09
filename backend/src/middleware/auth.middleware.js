@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const authenticate = (req, res, next) => {
-  // For browser-redirect flows (e.g. Reddit OAuth initiation), accept token via query param
+  // For browser-redirect flows, accept token via query param
   const queryToken = req.query?.token;
   const authHeader = req.headers.authorization;
 

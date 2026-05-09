@@ -57,6 +57,18 @@ exports.generate = async (req, res) => {
     }
 
     const sanitizedPrompt = prompt.trim();
+
+    const bannedWordsEnv = process.env.BANNED_WORDS || "";
+    const BANNED_WORDS = bannedWordsEnv.split(',').map(w => w.trim()).filter(Boolean);
+    const containsBannedWord = BANNED_WORDS.some(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'i');
+        return regex.test(sanitizedPrompt);
+    });
+
+    if (containsBannedWord) {
+        return res.status(400).json({ message: "Your prompt contains banned words and cannot be processed." });
+    }
+
     const userId = BigInt(req.user.userId);
 
     try {

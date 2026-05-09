@@ -5,7 +5,6 @@ import Signup from './components/Signup/Signup';
 import EmailVerify from './components/EmailVerify/EmailVerify';
 import Generate from './components/Generate/Generate';
 import Scheduler from './components/Scheduler/Scheduler';
-import Reddit from './components/Reddit/Reddit';
 import LinkedIn from './components/LinkedIn/LinkedIn';
 import Dashboard from './components/Dashboard/Dashboard';
 import Navbar from './components/Navbar/Navbar';
@@ -75,11 +74,6 @@ function App() {
         <Route path="/linkedin" element={
           <RequireAuth>
             <AppLayout><LinkedIn /></AppLayout>
-          </RequireAuth>
-        } />
-        <Route path="/reddit" element={
-          <RequireAuth>
-            <AppLayout><Reddit /></AppLayout>
           </RequireAuth>
         } />
 
