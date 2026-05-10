@@ -2,20 +2,12 @@ const { Queue, Worker, QueueEvents } = require("bullmq");
 const { spawn } = require("child_process");
 const path = require("path");
 const prisma = require("../prisma/client");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const { publishToLinkedInInternal } = require("../controllers/linkedin.controller");
 
 
-// Node Mailer
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: process.env.SMTP_PORT || 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+// Configure Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 
 // ── Redis connection ──────────────────────────────────────────────────────────
@@ -271,20 +263,20 @@ function startWorker() {
 }
 
 async function sendEmail(email, subject, text, html) {
-    // Send Confirmation Email
-    const mailOptions = {
-        from: `"Smartpost Auth" <${process.env.SMTP_USER}>`,
-        to: email,
-        subject: subject,
-        text: text,
-        html: html,
-    };
-
-    // Note: If you haven't set SMTP variables, sending will fail.
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        await transporter.sendMail(mailOptions);
+    if (process.env.RESEND_API_KEY) {
+        try {
+            await resend.emails.send({
+                from: 'onboarding@resend.dev',
+                to: email,
+                subject: subject,
+                text: text,
+                html: html,
+            });
+        } catch (error) {
+            console.error(`Failed to send email: ${error.message}`);
+        }
     } else {
-        console.log(`Failed to email code`);
+        console.log(`Failed to email code (Missing RESEND_API_KEY)`);
     }
 }
 

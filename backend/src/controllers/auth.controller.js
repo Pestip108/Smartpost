@@ -1,21 +1,13 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const { OAuth2Client } = require("google-auth-library");
 const prisma = require("../prisma/client");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// Configure nodemailer transporter
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: process.env.SMTP_PORT || 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+// Configure Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -60,19 +52,16 @@ const signup = async (req, res) => {
         });
 
         // Send code via email
-        const mailOptions = {
-            from: `"Smartpost Auth" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: "Your Verification Code",
-            text: `Your verification code is: ${code}. It will expire in 15 minutes.`,
-            html: `<h3>Welcome to Smartpost</h3><p>Your verification code is: <strong>${code}</strong></p><p>It will expire in 15 minutes.</p>`,
-        };
-
-        // Note: If you haven't set SMTP variables, sending will fail.
-        if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-            await transporter.sendMail(mailOptions);
+        if (process.env.RESEND_API_KEY) {
+            await resend.emails.send({
+                from: 'onboarding@resend.dev',
+                to: email,
+                subject: "Your Verification Code",
+                text: `Your verification code is: ${code}. It will expire in 15 minutes.`,
+                html: `<h3>Welcome to Smartpost</h3><p>Your verification code is: <strong>${code}</strong></p><p>It will expire in 15 minutes.</p>`,
+            });
         } else {
-            console.log(`Failed to email code`);
+            console.log(`Failed to email code (Missing RESEND_API_KEY)`);
         }
 
         res.status(200).json({ message: "Verification code sent to email" });
@@ -177,15 +166,14 @@ const resendCode = async (req, res) => {
         });
 
         // Send code via email
-        const mailOptions = {
-            from: `"Smartpost Auth" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: "Your New Verification Code",
-            text: `Your new verification code is: ${code}. It will expire in 15 minutes.`,
-        };
-
-        if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-            await transporter.sendMail(mailOptions);
+        if (process.env.RESEND_API_KEY) {
+            await resend.emails.send({
+                from: 'onboarding@resend.dev',
+                to: email,
+                subject: "Your New Verification Code",
+                text: `Your new verification code is: ${code}. It will expire in 15 minutes.`,
+                html: `<p>Your new verification code is: <strong>${code}</strong>. It will expire in 15 minutes.</p>`
+            });
         } else {
             console.log(`[TESTING] New verification code for ${email}: ${code}`);
         }
@@ -289,16 +277,14 @@ const googleAuth = async (req, res) => {
             });
 
             // Send code via email
-            const mailOptions = {
-                from: `"Smartpost Auth" <${process.env.SMTP_USER}>`,
-                to: email,
-                subject: "Your Verification Code (Google Link)",
-                text: `Your verification code is: ${code}. It will expire in 15 minutes.`,
-                html: `<h3>Welcome to Smartpost</h3><p>Your verification code is: <strong>${code}</strong></p><p>It will expire in 15 minutes.</p>`,
-            };
-
-            if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-                await transporter.sendMail(mailOptions);
+            if (process.env.RESEND_API_KEY) {
+                await resend.emails.send({
+                    from: 'onboarding@resend.dev',
+                    to: email,
+                    subject: "Your Verification Code (Google Link)",
+                    text: `Your verification code is: ${code}. It will expire in 15 minutes.`,
+                    html: `<h3>Welcome to Smartpost</h3><p>Your verification code is: <strong>${code}</strong></p><p>It will expire in 15 minutes.</p>`,
+                });
             }
 
             return res.status(200).json({ 
