@@ -1,2 +1,2 @@
 [web]
-caddyfile = "Caddyfile"
+caddyfile = "Caddyfile.local"
