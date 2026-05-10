@@ -2,20 +2,8 @@ const { Queue, Worker, QueueEvents } = require("bullmq");
 const { spawn } = require("child_process");
 const path = require("path");
 const prisma = require("../prisma/client");
-const nodemailer = require("nodemailer");
 const { publishToLinkedInInternal } = require("../controllers/linkedin.controller");
 
-
-// Node Mailer
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: process.env.SMTP_PORT || 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
 
 
 // ── Redis connection ──────────────────────────────────────────────────────────
@@ -271,20 +259,34 @@ function startWorker() {
 }
 
 async function sendEmail(email, subject, text, html) {
-    // Send Confirmation Email
-    const mailOptions = {
-        from: `"Smartpost Auth" <${process.env.SMTP_USER}>`,
-        to: email,
-        subject: subject,
-        text: text,
-        html: html,
-    };
-
-    // Note: If you haven't set SMTP variables, sending will fail.
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        await transporter.sendMail(mailOptions);
-    } else {
-        console.log(`Failed to email code`);
+    if (!process.env.BREVO_API_KEY) {
+        console.log(`Failed to email code (Missing BREVO_API_KEY)`);
+        return;
+    }
+    
+    try {
+        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: {
+                "accept": "application/json",
+                "api-key": process.env.BREVO_API_KEY,
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                sender: { name: "Smartpost Auth", email: process.env.BREVO_SENDER_EMAIL || "smartpost.ai.1@gmail.com" },
+                to: [{ email: email }],
+                subject: subject,
+                htmlContent: html,
+                textContent: text
+            })
+        });
+        
+        if (!response.ok) {
+            const err = await response.text();
+            console.error(`Brevo API Error: ${err}`);
+        }
+    } catch (error) {
+        console.error(`Failed to send email: ${error.message}`);
     }
 }
 
