@@ -1,18 +1,14 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE `User` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `role` ENUM('pro', 'standard') NOT NULL DEFAULT 'standard',
+    `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
 
-  - The primary key for the `user` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to alter the column `id` on the `user` table. The data in that column could be lost. The data in that column will be cast from `Int` to `UnsignedBigInt`.
-
-*/
--- AlterTable
-ALTER TABLE `user` DROP PRIMARY KEY,
-    ADD COLUMN `role` ENUM('pro', 'standard') NOT NULL DEFAULT 'standard',
-    MODIFY `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    MODIFY `email` VARCHAR(255) NOT NULL,
-    MODIFY `password` VARCHAR(255) NOT NULL,
-    MODIFY `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-    ADD PRIMARY KEY (`id`);
+    UNIQUE INDEX `User_email_key`(`email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Platform` (
@@ -33,7 +29,6 @@ CREATE TABLE `SocialAccount` (
     `accessToken` TEXT NOT NULL,
     `refreshToken` TEXT NULL,
     `expiresAt` DATETIME(0) NULL,
-    `redditUsername` VARCHAR(100) NULL,
     `linkedinUrn` VARCHAR(100) NULL,
     `linkedinName` VARCHAR(255) NULL,
 
@@ -77,6 +72,7 @@ CREATE TABLE `ScheduledTask` (
     `intervalHours` INTEGER UNSIGNED NOT NULL,
     `nextExecution` DATETIME(0) NOT NULL,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `publishLinkedIn` BOOLEAN NOT NULL DEFAULT false,
     `socialAccountId` BIGINT UNSIGNED NOT NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
