@@ -201,11 +201,14 @@ const callback = async (req, res) => {
 const getStatus = async (req, res) => {
   try {
     const account = await getAccount(req.user.userId);
-    if (!account) return res.json({ connected: false });
+    const redirectUri = process.env.LINKEDIN_REDIRECT_URI;
+    
+    if (!account) return res.json({ connected: false, redirectUri });
     res.json({
       connected: true,
       name: account.linkedinName,
       urn: account.linkedinUrn,
+      redirectUri,
     });
   } catch (err) {
     console.error("LinkedIn status error:", err.message);

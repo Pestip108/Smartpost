@@ -11,7 +11,7 @@ function authHeaders() {
 }
 
 export default function LinkedIn() {
-  const [status, setStatus] = useState({ connected: false, name: null });
+  const [status, setStatus] = useState({ connected: false, name: null, redirectUri: null });
   const [posts, setPosts] = useState([]);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(false);
@@ -40,7 +40,7 @@ export default function LinkedIn() {
       const { data } = await axios.get(`${API}/status`, { headers: authHeaders() });
       setStatus(data);
     } catch {
-      setStatus({ connected: false, name: null });
+      setStatus({ connected: false, name: null, redirectUri: null });
     } finally {
       setLoadingStatus(false);
     }
@@ -87,7 +87,7 @@ export default function LinkedIn() {
     try {
       setDisconnecting(true);
       await axios.delete(`${API}/disconnect`, { headers: authHeaders() });
-      setStatus({ connected: false, name: null });
+      setStatus(prev => ({ ...prev, connected: false, name: null }));
       setPosts([]);
       showToast('LinkedIn account disconnected.');
     } catch (err) {
@@ -194,6 +194,12 @@ export default function LinkedIn() {
               <button className="btn btn-primary" onClick={handleConnect}>
                 Connect LinkedIn
               </button>
+            </div>
+          )}
+          {status.redirectUri && (
+            <div className="banner" style={{ marginTop: 12, fontSize: '0.85rem' }}>
+              <strong>Debug - Redirect URI (from backend):</strong><br/>
+              <code>{status.redirectUri}</code>
             </div>
           )}
         </div>
