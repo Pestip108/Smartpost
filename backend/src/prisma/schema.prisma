@@ -21,6 +21,7 @@ model User {
   createdAt       DateTime        @default(now()) @db.Timestamp(0)
 
   socialAccounts  SocialAccount[]
+  drafts          Draft[]
 }
 
 enum Role {
@@ -125,4 +126,17 @@ model EmailVerification {
   expiresAt       DateTime
   attempts        Int             @default(0)
   createdAt       DateTime        @default(now())
+}
+
+model Draft {
+  id              BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  userId          BigInt          @db.UnsignedBigInt
+  topic           String?         @db.VarChar(255)
+  content         String          @db.Text
+  imageUrl        String?         @db.VarChar(500)
+  createdAt       DateTime        @default(now()) @db.Timestamp(0)
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_draft_user")
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Sparkles, Briefcase, Scale, Smile, Flame, ClipboardCopy, CheckCircle, Send, Radio, Theater, Cpu } from 'lucide-react';
+import { Sparkles, Briefcase, Scale, Smile, Flame, ClipboardCopy, CheckCircle, Send, Radio, Theater, Cpu, AlertTriangle } from 'lucide-react';
 import './Generate.css';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/generate`;
@@ -92,6 +92,19 @@ export default function Generate() {
             });
             setResult(data);
             setDoneSteps(includeImage ? [0, 1, 2, 3] : [0, 1, 2]); // Mark all steps complete
+
+            // Automatically save to drafts
+            try {
+                await axios.post(`${import.meta.env.VITE_API_URL}/api/drafts`, {
+                    topic: prompt.trim(),
+                    content: data.post,
+                    imageUrl: data.imageUrl || null
+                }, {
+                    headers: { Authorization: token ? `Bearer ${token}` : '' }
+                });
+            } catch (draftErr) {
+                console.error("Failed to save draft:", draftErr);
+            }
         } catch (err) {
             setError(err.response?.data?.message || err.message || 'Something went wrong. Please try again.');
         } finally {
@@ -151,6 +164,13 @@ export default function Generate() {
                     </div>
                 </div>
             </div>
+
+            {!linkedinStatus.connected && (
+                <div className="banner banner-error" style={{ marginBottom: 20 }}>
+                    <AlertTriangle size={16} /> 
+                    <span>You are not connected to LinkedIn. You can generate posts, but you won't be able to publish them directly. <Link to="/linkedin" style={{ color: 'inherit', textDecoration: 'underline' }}>Connect here</Link>.</span>
+                </div>
+            )}
 
             {!result && !loading && (
                 <form className="glass generate-card" onSubmit={handleGenerate}>

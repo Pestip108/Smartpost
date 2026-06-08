@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { CalendarDays, Scale, Briefcase, Smile, Flame, CheckCircle, Link2, Clock, RefreshCw, Inbox } from 'lucide-react';
+import { CalendarDays, Scale, Briefcase, Smile, Flame, CheckCircle, Link2, Clock, RefreshCw, Inbox, AlertTriangle } from 'lucide-react';
 import './Scheduler.css';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/scheduler`;
@@ -130,6 +130,13 @@ export default function Scheduler() {
                     <p className="page-subtitle">Set a topic once, get AI-generated posts delivered on a recurring schedule.</p>
                 </div>
             </div>
+
+            {!linkedinStatus.connected && (
+                <div className="banner banner-error" style={{ marginBottom: 20 }}>
+                    <AlertTriangle size={16} /> 
+                    <span>You are not connected to LinkedIn. You must connect your account to automatically publish scheduled posts. <Link to="/linkedin" style={{ color: 'inherit', textDecoration: 'underline' }}>Connect here</Link>.</span>
+                </div>
+            )}
 
             <div className="sch-layout">
                 {/* ── Create Form ──────────── */}

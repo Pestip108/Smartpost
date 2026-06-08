@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, CalendarDays, Briefcase, Bot, Radio, Theater, Timer, Zap, Lightbulb, Link2, RefreshCw } from 'lucide-react';
+import { Sparkles, CalendarDays, Briefcase, Bot, Radio, Theater, Timer, Zap, Lightbulb, Link2, RefreshCw, Archive } from 'lucide-react';
 import './Dashboard.css';
 
 const FEATURES = [
@@ -30,6 +30,15 @@ const FEATURES = [
     desc: 'Connect your LinkedIn account and publish professional posts directly from Smartpost.',
     badge: 'Connected',
     color: 'linkedin',
+  },
+  {
+    id: 'drafts',
+    to: '/drafts',
+    icon: <Archive size={22} />,
+    title: 'Drafts & History',
+    desc: 'Review past generated posts, copy them, or publish to LinkedIn at your convenience.',
+    badge: 'History',
+    color: 'cyan',
   },
 ];
 

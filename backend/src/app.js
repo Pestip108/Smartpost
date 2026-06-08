@@ -19,6 +19,7 @@ app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/generate", require("./routes/generate.routes"));
 app.use("/api/scheduler", require("./routes/scheduler.routes"));
 app.use("/api/linkedin", require("./routes/linkedin.routes"));
+app.use("/api/drafts", require("./routes/draft.routes"));
 
 
 

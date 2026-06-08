@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../App';
-import { LayoutDashboard, Sparkles, CalendarDays, ExternalLink, Zap } from 'lucide-react';
+import { LayoutDashboard, Sparkles, CalendarDays, ExternalLink, Zap, Archive } from 'lucide-react';
 import './Navbar.css';
 
 const NAV_LINKS = [
   { to: '/',         label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
   { to: '/generate', label: 'Generate',  icon: <Sparkles size={16} /> },
   { to: '/schedule', label: 'Schedule',  icon: <CalendarDays size={16} /> },
+  { to: '/drafts',   label: 'Drafts',    icon: <Archive size={16} /> },
   { to: '/linkedin', label: 'LinkedIn',  icon: <ExternalLink size={16} /> },
 ];
 
