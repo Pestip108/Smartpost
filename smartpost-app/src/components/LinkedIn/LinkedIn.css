@@ -203,3 +203,88 @@
   .account-row { flex-direction: column; text-align: center; }
   .account-row button { width: 100%; }
 }
+
+/* Image Upload & Preview */
+.upload-btn-wrap {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-input-hidden {
+  display: none;
+}
+
+.btn-upload-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  border: 1.5px dashed var(--border);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-upload-trigger:hover {
+  border-color: #0077b5;
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.composer-preview-container {
+  position: relative;
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: 100%;
+  border: 1px solid var(--border);
+}
+
+.composer-preview-img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  display: block;
+}
+
+.btn-remove-preview {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.btn-remove-preview:hover {
+  background: var(--danger);
+}
+
+/* Post Card Media */
+.post-media-wrap {
+  margin-top: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.post-media-img {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  display: block;
+}

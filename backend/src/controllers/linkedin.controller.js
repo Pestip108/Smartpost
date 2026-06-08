@@ -1,5 +1,6 @@
 const axios = require("axios");
 const prisma = require("../prisma/client");
+const fs = require("fs");
 
 const LINKEDIN_AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization";
 const LINKEDIN_TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken";
@@ -227,14 +228,21 @@ const createPost = async (req, res) => {
   }
 
   try {
-    const { externalPostId, accountId } = await publishToLinkedInInternal(req.user.userId, text);
+    const fileObj = req.file ? {
+      path: req.file.path,
+      mimetype: req.file.mimetype,
+      filename: req.file.filename,
+    } : null;
+
+    const { externalPostId, accountId } = await publishToLinkedInInternal(req.user.userId, text, fileObj);
 
     // Persist to DB
     const dbPost = await prisma.post.create({
       data: {
         socialAccountId: accountId,
         content: text.trim(),
-        type: "text",
+        type: fileObj ? "image" : "text",
+        mediaUrl: fileObj ? `/public/uploads/${fileObj.filename}` : null,
         status: "posted",
         externalPostId,
       },
@@ -377,6 +385,8 @@ const getPosts = async (req, res) => {
         id: p.id.toString(),
         content: p.content,
         status: p.status,
+        type: p.type,
+        mediaUrl: p.mediaUrl,
         externalPostId: p.externalPostId,
         createdAt: p.createdAt,
       })),
@@ -413,7 +423,7 @@ const disconnect = async (req, res) => {
  * Internal helper for the background worker or other services to publish to LinkedIn.
  * Does NOT require an Express req/res object.
  */
-async function publishToLinkedInInternal(userId, text) {
+async function publishToLinkedInInternal(userId, text, fileObj = null) {
   try {
     const account = await getAccount(userId);
     if (!account) {
@@ -421,6 +431,41 @@ async function publishToLinkedInInternal(userId, text) {
     }
 
     const token = await getValidToken(account);
+
+    let contentObj = undefined;
+
+    // Handle image upload if a file is provided
+    if (fileObj) {
+      console.log("[LinkedIn] Registering image upload...");
+      const initRes = await axios.post(
+        `${LINKEDIN_API_URL}/rest/images?action=initializeUpload`,
+        {
+          initializeUploadRequest: {
+            owner: account.linkedinUrn,
+          },
+        },
+        { headers: linkedInHeaders(token) }
+      );
+
+      const { uploadUrl, image: imageUrn } = initRes.data.value;
+
+      console.log("[LinkedIn] Uploading image binary data...");
+      const fileBuffer = fs.readFileSync(fileObj.path);
+      await axios.put(uploadUrl, fileBuffer, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": fileObj.mimetype,
+          "X-Restli-Protocol-Version": "2.0.0",
+        },
+      });
+
+      contentObj = {
+        media: {
+          id: imageUrn,
+        },
+      };
+      console.log("[LinkedIn] Image uploaded successfully. Asset URN:", imageUrn);
+    }
 
     const payload = {
       author: account.linkedinUrn,
@@ -434,6 +479,10 @@ async function publishToLinkedInInternal(userId, text) {
       lifecycleState: "PUBLISHED",
       isReshareDisabledByAuthor: false,
     };
+
+    if (contentObj) {
+      payload.content = contentObj;
+    }
 
     const postRes = await axios.post(
       `${LINKEDIN_API_URL}/rest/posts`,

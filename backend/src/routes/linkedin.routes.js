@@ -1,6 +1,7 @@
 const express = require("express");
 const linkedinController = require("../controllers/linkedin.controller");
 const { authenticate } = require("../middleware/auth.middleware");
+const { handleUpload } = require("../middleware/upload.middleware");
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.get("/status", authenticate, linkedinController.getStatus);
 
 // Post management
 router.get("/posts", authenticate, linkedinController.getPosts);
-router.post("/post", authenticate, linkedinController.createPost);
+router.post("/post", authenticate, handleUpload, linkedinController.createPost);
 router.patch("/post/:postId", authenticate, linkedinController.editPost);
 router.delete("/post/:postId", authenticate, linkedinController.deletePost);
 
