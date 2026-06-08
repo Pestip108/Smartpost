@@ -122,12 +122,14 @@ const initiateLogin = (req, res) => {
 const callback = async (req, res) => {
   const { code, state, error } = req.query;
 
+  const frontendUrl = process.env.LINKEDIN_FRONTEND_URL || "http://localhost:5173";
+
   if (error) {
-    return res.redirect(`http://localhost:5173/linkedin?error=${error}`);
+    return res.redirect(`${frontendUrl}/linkedin?error=${error}`);
   }
 
   if (!code || !state) {
-    return res.redirect("http://localhost:5173/linkedin?error=missing_params");
+    return res.redirect(`${frontendUrl}/linkedin?error=missing_params`);
   }
 
   try {
@@ -185,10 +187,10 @@ const callback = async (req, res) => {
       },
     });
 
-    res.redirect("http://localhost:5173/linkedin?connected=true");
+    res.redirect(`${frontendUrl}/linkedin?connected=true`);
   } catch (err) {
     console.error("LinkedIn callback error:", err.response?.data || err.message);
-    res.redirect("http://localhost:5173/linkedin?error=token_exchange_failed");
+    res.redirect(`${frontendUrl}/linkedin?error=token_exchange_failed`);
   }
 };
 
