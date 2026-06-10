@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { CheckCircle, XCircle, Pencil, Trash2, AlertTriangle, Send, Briefcase } from 'lucide-react';
+import { CheckCircle, XCircle, Pencil, Trash2, AlertTriangle, Send, Briefcase, Image as ImageIcon, X } from 'lucide-react';
 import './LinkedIn.css';
 
 const API = `${import.meta.env.VITE_API_URL}/api/linkedin`;
@@ -20,6 +20,9 @@ export default function LinkedIn() {
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState('');
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
@@ -28,6 +31,36 @@ export default function LinkedIn() {
   const [toast, setToast] = useState('');
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 3000;
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setPostError('');
+    if (!file) return;
+
+    // Validate size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setPostError('Image size must be less than 5MB.');
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      setPostError('Unsupported file type. Only JPEG, PNG, and GIF images are allowed.');
+      return;
+    }
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+  };
 
   const showToast = (msg) => {
     setToast(msg);
@@ -103,9 +136,23 @@ export default function LinkedIn() {
     if (!text.trim()) return;
     try {
       setPosting(true);
-      await axios.post(`${API}/post`, { text: text.trim() }, { headers: authHeaders() });
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("text", text.trim());
+        formData.append("image", imageFile);
+
+        await axios.post(`${API}/post`, formData, {
+          headers: {
+            ...authHeaders(),
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+      } else {
+        await axios.post(`${API}/post`, { text: text.trim() }, { headers: authHeaders() });
+      }
       setText('');
       setCharCount(0);
+      handleRemoveImage();
       fetchPosts();
       showToast(<><Send size={14} /> Post published to LinkedIn!</>);
     } catch (err) {
@@ -223,6 +270,36 @@ export default function LinkedIn() {
                   </div>
                 </div>
               </div>
+
+              {/* Image upload and preview */}
+              <div className="upload-btn-wrap">
+                <input
+                  type="file"
+                  id="image-upload"
+                  className="upload-input-hidden"
+                  accept="image/png, image/jpeg, image/gif"
+                  onChange={handleImageChange}
+                  disabled={posting}
+                />
+                <label htmlFor="image-upload" className="btn-upload-trigger">
+                  <ImageIcon size={15} /> Select Image
+                </label>
+                {imageFile && (
+                  <span className="upload-file-name" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {imageFile.name}
+                  </span>
+                )}
+              </div>
+
+              {imagePreview && (
+                <div className="composer-preview-container">
+                  <img src={imagePreview} alt="Preview" className="composer-preview-img" />
+                  <button type="button" className="btn-remove-preview" onClick={handleRemoveImage} disabled={posting} title="Remove image">
+                    <X size={15} />
+                  </button>
+                </div>
+              )}
+
               {postError && <div className="banner banner-error" style={{ marginTop: 12 }}><AlertTriangle size={15} /> {postError}</div>}
               <button type="submit" className="btn btn-primary li-post-btn" disabled={posting || !text.trim()}>
                 {posting ? <span className="spinner" /> : <><Send size={15} /> Publish to LinkedIn</>}
@@ -289,7 +366,14 @@ export default function LinkedIn() {
                           </div>
                         </div>
                       ) : (
-                        <div className="post-body">{post.content}</div>
+                        <>
+                          <div className="post-body">{post.content}</div>
+                          {post.mediaUrl && (
+                            <div className="post-media-wrap">
+                              <img src={`${import.meta.env.VITE_API_URL}${post.mediaUrl}`} alt="Post Media" className="post-media-img" />
+                            </div>
+                          )}
+                        </>
                       )}
 
                       <div className="post-footer">
