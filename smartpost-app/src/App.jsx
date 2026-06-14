@@ -16,10 +16,30 @@ export const ThemeContext = createContext();
 export function useTheme() { return useContext(ThemeContext); }
 
 // ── Auth guard ────────────────────────────────
+const isTokenExpired = (token) => {
+  if (!token) return true;
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const decodedJson = atob(payloadBase64);
+    const decoded = JSON.parse(decodedJson);
+    const exp = decoded.exp;
+    const now = Date.now() / 1000;
+    return exp < now;
+  } catch (e) {
+    return true;
+  }
+};
+
 function RequireAuth({ children }) {
   const token = localStorage.getItem('token');
   const location = useLocation();
-  if (!token) return <Navigate to="/login" state={{ from: location }} replace />;
+  
+  if (!token || isTokenExpired(token)) {
+    if (token) {
+      localStorage.clear();
+    }
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
   return children;
 }
 
