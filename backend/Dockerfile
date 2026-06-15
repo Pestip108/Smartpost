@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install Node dependencies
+# Copy package files
 COPY package.json package-lock.json ./
+
+# Install dependencies (this will run prisma generate via postinstall)
 RUN npm ci
 
 # Copy application code
