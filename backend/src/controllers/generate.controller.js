@@ -13,7 +13,7 @@ const PYTHON_CMD = process.platform === "win32" ? "python" : "python3";
  * @returns {Promise<object>}
  */
 function runPython(script, args = []) {
-    console.log(execSync("which python3").toString());  // TESTING
+    console.log(execSync("whereis python3").toString());  // TESTING
 
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(PYTHON_DIR, script);
