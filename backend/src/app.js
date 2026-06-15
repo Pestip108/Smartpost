@@ -21,17 +21,6 @@ app.use("/api/scheduler", require("./routes/scheduler.routes"));
 app.use("/api/linkedin", require("./routes/linkedin.routes"));
 app.use("/api/drafts", require("./routes/draft.routes"));
 
-app.get("/debug", async (req, res) => {
-    const { exec } = require("child_process");
-
-    exec("which python3", (err, stdout, stderr) => {
-        res.json({
-            err: err?.message,
-            stdout,
-            stderr
-        });
-    });
-});
 
 
 module.exports = app;

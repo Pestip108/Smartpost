@@ -12,6 +12,8 @@ const PYTHON_CMD = process.platform === "win32" ? "python" : "python3";
  * @returns {Promise<object>}
  */
 function runPython(script, args = []) {
+    console.log(spawn("which python3").toString());
+
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(PYTHON_DIR, script);
         const proc = spawn(PYTHON_CMD, [scriptPath, ...args], {
