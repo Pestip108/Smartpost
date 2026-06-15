@@ -8,14 +8,11 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json ./
-
-# Install dependencies (this will run prisma generate via postinstall)
-RUN npm ci
-
-# Copy application code
+# Copy application code first so prisma/ schema exists for postinstall hook
 COPY . .
+
+# Install Node dependencies
+RUN npm ci
 
 EXPOSE 4000
 
