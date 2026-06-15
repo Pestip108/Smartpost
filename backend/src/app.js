@@ -22,5 +22,4 @@ app.use("/api/linkedin", require("./routes/linkedin.routes"));
 app.use("/api/drafts", require("./routes/draft.routes"));
 
 
-
 module.exports = app;
