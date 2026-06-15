@@ -1,5 +1,4 @@
 const { spawn } = require("child_process");
-const { execSync } = require("child_process");  // TESTING
 const path = require("path");
 const prisma = require("../prisma/client");
 
@@ -13,8 +12,6 @@ const PYTHON_CMD = process.platform === "win32" ? "python" : "python3";
  * @returns {Promise<object>}
  */
 function runPython(script, args = []) {
-    console.log(execSync("whereis python3").toString());  // TESTING
-
     return new Promise((resolve, reject) => {
         const scriptPath = path.join(PYTHON_DIR, script);
         const proc = spawn(PYTHON_CMD, [scriptPath, ...args], {
