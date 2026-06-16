@@ -4,10 +4,19 @@ WORKDIR /app
 
 COPY . .
 
-RUN npm install
-RUN npx prisma generate
+# Install system deps
+RUN apt-get update && apt-get install -y python3 python3-pip python3-venv
 
-RUN apt-get update && apt-get install -y python3 python3-pip
-RUN pip3 install -r requirements.txt
+# Create virtual environment
+RUN python3 -m venv /venv
+
+# Install Python deps inside venv
+RUN /venv/bin/pip install --upgrade pip
+RUN /venv/bin/pip install -r requirements.txt
+
+# Use venv python at runtime
+ENV PATH="/venv/bin:$PATH"
+
+RUN npm install
 
 CMD ["node", "src/index.js"]
