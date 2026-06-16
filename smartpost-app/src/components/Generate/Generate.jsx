@@ -245,6 +245,7 @@ export default function Generate() {
                     </div>
 
                     <div className="loading-text">Crafting your post…</div>
+                    <div className="loading-subtext" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center' }}>This might take a couple of minutes.</div>
 
                     <div className="loading-steps">
                         {visibleSteps.map((step, i) => (

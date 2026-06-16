@@ -14,7 +14,6 @@ const ATTITUDES = [
 ];
 
 const INTERVAL_OPTIONS = [
-    { label: 'Every 2 minutes', value: 0.333 },
     { label: 'Every 1 hours', value: 1 },
     { label: 'Every 3 hours', value: 3 },
     { label: 'Every 6 hours', value: 6 },

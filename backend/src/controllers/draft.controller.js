@@ -79,7 +79,7 @@ const deleteDraft = async (req, res) => {
       return res.status(404).json({ message: "Draft not found" });
     }
 
-    if (draft.userId !== req.user.userId) {
+    if (draft.userId.toString() !== req.user.userId.toString()) {
       return res.status(403).json({ message: "Forbidden" });
     }
 

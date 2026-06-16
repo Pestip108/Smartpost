@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Archive, Trash2, ClipboardCopy, CheckCircle, Send, Image as ImageIcon } from 'lucide-react';
+import { Archive, Trash2, ClipboardCopy, CheckCircle, Send, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import './Drafts.css';
 
 const API = `${import.meta.env.VITE_API_URL}/api`;
@@ -20,6 +20,7 @@ export default function Drafts() {
   const [publishingId, setPublishingId] = useState(null);
   const [toast, setToast] = useState('');
   const [copiedId, setCopiedId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -57,15 +58,25 @@ export default function Drafts() {
     });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this draft permanently?')) return;
+  const handleDelete = (id) => {
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
     try {
-      await axios.delete(`${API}/drafts/${id}`, { headers: authHeaders() });
-      setDrafts((prev) => prev.filter((d) => d.id !== id));
+      await axios.delete(`${API}/drafts/${deleteConfirmId}`, { headers: authHeaders() });
+      setDrafts((prev) => prev.filter((d) => d.id !== deleteConfirmId));
       showToast('Draft deleted.');
     } catch (err) {
-      showToast('❌ Failed to delete draft');
+      showToast(err.response?.data?.message || '❌ Failed to delete draft');
+    } finally {
+      setDeleteConfirmId(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmId(null);
   };
 
   const handlePublish = async (draft) => {
@@ -100,6 +111,24 @@ export default function Drafts() {
       </div>
 
       <div className="drafts-layout">
+        {deleteConfirmId && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div className="glass" style={{ padding: '24px', maxWidth: '400px', width: '90%', textAlign: 'center', backgroundColor: 'var(--bg-glass)' }}>
+              <AlertTriangle size={48} style={{ color: 'var(--danger)', marginBottom: '16px' }} />
+              <h3 style={{ marginBottom: '8px', fontSize: '1.25rem', fontWeight: 'bold' }}>Delete Draft</h3>
+              <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>Are you sure you want to delete this draft permanently? This action cannot be undone.</p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button className="btn btn-ghost" onClick={cancelDelete}>Cancel</button>
+                <button className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="section-title-row">
           <div className="section-title" style={{ margin: 0 }}>Saved Drafts</div>
           <div className="posts-count-badge">{drafts.length}</div>
