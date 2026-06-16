@@ -1,11 +1,9 @@
 import sys
 import json
 import os
-from dotenv import load_dotenv
 from googleapiclient.discovery import build
 
 # Load API key from .env
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 
