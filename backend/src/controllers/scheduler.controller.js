@@ -38,7 +38,7 @@ exports.create = async (req, res) => {
     if (isNaN(firstRun.getTime()) || firstRun <= new Date()) {
         return res
             .status(400)
-            .json({ message: "scheduledAt must be a future date-time" });
+            .json({ message: "Please choose a date and time in the future. You cannot schedule a post in the past." });
     }
 
     const userId = BigInt(req.user.userId);

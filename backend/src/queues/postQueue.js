@@ -235,6 +235,11 @@ function startWorker() {
                 : `<p>Your post about <strong>"${topic}"</strong> was successfully created and stored as a draft!</p>
                    <br/><p>${postData.output}</p>`;
 
+            if (imageUrl) {
+                const absoluteImageUrl = `${process.env.BACKEND_URL || 'http://localhost:4000'}${imageUrl}`;
+                html += `<br/><br/><img src="${absoluteImageUrl}" alt="Generated Image" style="max-width: 100%; height: auto; border-radius: 8px;" />`;
+            }
+
             await sendEmail(user.email, subject, text, html);
 
 

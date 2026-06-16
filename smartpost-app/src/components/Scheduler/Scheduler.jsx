@@ -84,6 +84,7 @@ export default function Scheduler() {
 
         if (!topic.trim()) return setError('Topic is required.');
         if (!scheduledAt) return setError('Please choose a start date & time.');
+        if (new Date(scheduledAt) <= new Date()) return setError('Please choose a date and time in the future. You cannot schedule a post in the past.');
 
         setSubmitting(true);
         try {
@@ -127,6 +128,12 @@ export default function Scheduler() {
 
     const closeCancelModal = () => {
         setCancelConfirmId(null);
+    };
+
+    const getMinDateTime = () => {
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
 
     return (
@@ -214,6 +221,7 @@ export default function Scheduler() {
                                 type="datetime-local"
                                 className="sp-input"
                                 value={scheduledAt}
+                                min={getMinDateTime()}
                                 onChange={(e) => setScheduledAt(e.target.value)}
                                 disabled={submitting}
                                 required
