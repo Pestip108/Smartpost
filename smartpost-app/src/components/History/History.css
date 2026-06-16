@@ -29,6 +29,19 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.controls-bar .sp-input {
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 10px;
+}
+
+.controls-bar .sp-input option {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
 .draft-topic {
   font-size: 0.95rem;
   color: var(--text-primary);
