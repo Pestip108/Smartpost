@@ -160,7 +160,16 @@ function startWorker() {
             if (publishLinkedIn) {
                 try {
                     console.log(`[BullMQ] Auto-publishing to LinkedIn for user ${userId}`);
-                    const publishRes = await publishToLinkedInInternal(userId, postData.output);
+                    let fileObj = null;
+                    if (imageUrl) {
+                        const filename = imageUrl.split('/').pop();
+                        fileObj = {
+                            path: path.join(__dirname, "../../public/generated_images", filename),
+                            mimetype: "image/png",
+                            filename: filename
+                        };
+                    }
+                    const publishRes = await publishToLinkedInInternal(userId, postData.output, fileObj);
                     publishedSuccessfully = true;
                     externalPostId = publishRes.externalPostId;
 

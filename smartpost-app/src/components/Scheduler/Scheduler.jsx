@@ -46,6 +46,7 @@ export default function Scheduler() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [cancelConfirmId, setCancelConfirmId] = useState(null);
 
     const [tasks, setTasks] = useState([]);
     const [loadingTasks, setLoadingTasks] = useState(true);
@@ -108,14 +109,24 @@ export default function Scheduler() {
         }
     };
 
-    const handleCancel = async (id) => {
-        if (!window.confirm('Cancel this scheduled task?')) return;
+    const handleCancel = (id) => {
+        setCancelConfirmId(id);
+    };
+
+    const confirmCancel = async () => {
+        if (!cancelConfirmId) return;
         try {
-            await axios.delete(`${API_URL}/${id}`, { headers: authHeaders() });
-            setTasks((prev) => prev.filter((t) => t.id !== id));
+            await axios.delete(`${API_URL}/${cancelConfirmId}`, { headers: authHeaders() });
+            setTasks((prev) => prev.filter((t) => t.id !== cancelConfirmId));
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to cancel task.');
+        } finally {
+            setCancelConfirmId(null);
         }
+    };
+
+    const closeCancelModal = () => {
+        setCancelConfirmId(null);
     };
 
     return (
@@ -138,6 +149,23 @@ export default function Scheduler() {
             )}
 
             <div className="sch-layout">
+                {cancelConfirmId && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1000,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                        <div className="glass" style={{ padding: '24px', maxWidth: '400px', width: '90%', textAlign: 'center', backgroundColor: 'var(--bg-glass)' }}>
+                            <AlertTriangle size={48} style={{ color: 'var(--danger)', marginBottom: '16px' }} />
+                            <h3 style={{ marginBottom: '8px', fontSize: '1.25rem', fontWeight: 'bold' }}>Cancel Scheduled Task</h3>
+                            <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>Are you sure you want to cancel this scheduled task? It will no longer generate posts.</p>
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                <button className="btn btn-ghost" onClick={closeCancelModal}>Keep Task</button>
+                                <button className="btn btn-danger" onClick={confirmCancel}>Cancel Task</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {/* ── Create Form ──────────── */}
                 <form className="glass sch-form-card" onSubmit={handleSubmit}>
                     <div className="section-title">New Schedule</div>
