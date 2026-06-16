@@ -32,10 +32,10 @@ const FEATURES = [
     color: 'linkedin',
   },
   {
-    id: 'drafts',
-    to: '/drafts',
+    id: 'history',
+    to: '/history',
     icon: <Archive size={22} />,
-    title: 'Drafts & History',
+    title: 'History',
     desc: 'Review past generated posts, copy them, or publish to LinkedIn at your convenience.',
     badge: 'History',
     color: 'cyan',

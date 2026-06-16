@@ -10,7 +10,7 @@ app.use(express.json());
 app.use("/public", express.static(path.join(__dirname, "../public")));
 
 // Serve generated images statically: GET /generated_images/<filename>
-app.use("/generated_images", express.static(path.join(__dirname, "../../public/generated_images")));
+app.use("/generated_images", express.static(path.join(__dirname, "../public/generated_images")));
 
 app.use("/api/health", require("./routes/health.routes"));
 
@@ -20,6 +20,7 @@ app.use("/api/generate", require("./routes/generate.routes"));
 app.use("/api/scheduler", require("./routes/scheduler.routes"));
 app.use("/api/linkedin", require("./routes/linkedin.routes"));
 app.use("/api/drafts", require("./routes/draft.routes"));
+app.use("/api/history", require("./routes/history.routes"));
 
 
 

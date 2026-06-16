@@ -7,7 +7,7 @@ import Generate from './components/Generate/Generate';
 import Scheduler from './components/Scheduler/Scheduler';
 import LinkedIn from './components/LinkedIn/LinkedIn';
 import Dashboard from './components/Dashboard/Dashboard';
-import Drafts from './components/Drafts/Drafts';
+import History from './components/History/History';
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
 
@@ -97,9 +97,9 @@ function App() {
             <AppLayout><LinkedIn /></AppLayout>
           </RequireAuth>
         } />
-        <Route path="/drafts" element={
+        <Route path="/history" element={
           <RequireAuth>
-            <AppLayout><Drafts /></AppLayout>
+            <AppLayout><History /></AppLayout>
           </RequireAuth>
         } />
 

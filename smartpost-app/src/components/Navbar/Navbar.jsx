@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { to: '/',         label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
   { to: '/generate', label: 'Generate',  icon: <Sparkles size={16} /> },
   { to: '/schedule', label: 'Schedule',  icon: <CalendarDays size={16} /> },
-  { to: '/drafts',   label: 'Drafts',    icon: <Archive size={16} /> },
+  { to: '/history',  label: 'History',   icon: <Archive size={16} /> },
   { to: '/linkedin', label: 'LinkedIn',  icon: <ExternalLink size={16} /> },
 ];
 
