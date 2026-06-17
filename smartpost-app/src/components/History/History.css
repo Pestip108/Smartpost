@@ -42,6 +42,18 @@
   color: var(--text-primary);
 }
 
+@media (prefers-color-scheme: dark) {
+  .controls-bar .sp-input {
+    background: var(--bg-glass-dark, #2a2a2a);
+    color: var(--text-primary);
+    border-color: var(--border-color-dark, #555);
+  }
+  .controls-bar .sp-input option {
+    background: var(--bg-primary-dark, #1e1e1e);
+    color: var(--text-primary);
+  }
+}
+
 .draft-topic {
   font-size: 0.95rem;
   color: var(--text-primary);
