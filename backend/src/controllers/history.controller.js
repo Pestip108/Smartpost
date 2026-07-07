@@ -42,9 +42,7 @@ const getHistory = async (req, res) => {
       platform: null,
     }));
 
-const filteredPosts = posts.filter(p => p.status !== 'draft');
-
-    const normalizedPosts = filteredPosts.map(p => {
+    const normalizedPosts = posts.map(p => {
       const acc = user.socialAccounts.find(a => a.id === p.socialAccountId);
       return {
         id: `post_${p.id.toString()}`,

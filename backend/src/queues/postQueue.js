@@ -1,10 +1,9 @@
 const { Queue, Worker, QueueEvents } = require("bullmq");
 const { spawn } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 const prisma = require("../prisma/client");
 const { publishToLinkedInInternal } = require("../controllers/linkedin.controller");
-
-
 
 // ── Redis connection ──────────────────────────────────────────────────────────
 const connection = {
@@ -235,12 +234,27 @@ function startWorker() {
                 : `<p>Your post about <strong>"${topic}"</strong> was successfully created and stored as a draft!</p>
                    <br/><p>${postData.output}</p>`;
 
+            let attachments = [];
             if (imageUrl) {
                 const absoluteImageUrl = `${process.env.BACKEND_URL || 'http://localhost:4000'}${imageUrl}`;
                 html += `<br/><br/><img src="${absoluteImageUrl}" alt="Generated Image" style="max-width: 100%; height: auto; border-radius: 8px;" />`;
+
+                try {
+                    const filename = imageUrl.split('/').pop();
+                    const filePath = path.join(__dirname, "../../public/generated_images", filename);
+                    if (fs.existsSync(filePath)) {
+                        const contentBase64 = fs.readFileSync(filePath, { encoding: 'base64' });
+                        attachments.push({
+                            name: filename,
+                            content: contentBase64
+                        });
+                    }
+                } catch (err) {
+                    console.error("Failed to read image for email attachment:", err.message);
+                }
             }
 
-            await sendEmail(user.email, subject, text, html);
+            await sendEmail(user.email, subject, text, html, attachments);
 
 
             return { success: true };
@@ -272,13 +286,24 @@ function startWorker() {
     return worker;
 }
 
-async function sendEmail(email, subject, text, html) {
+async function sendEmail(email, subject, text, html, attachments = []) {
     if (!process.env.BREVO_API_KEY) {
         console.log(`Failed to email code (Missing BREVO_API_KEY)`);
         return;
     }
     
     try {
+        const emailData = {
+            sender: { name: "Smartpost Auth", email: process.env.BREVO_SENDER_EMAIL || "smartpost.ai.1@gmail.com" },
+            to: [{ email: email }],
+            subject: subject,
+            htmlContent: html,
+            textContent: text
+        };
+        if (attachments && attachments.length > 0) {
+            emailData.attachment = attachments;
+        }
+
         const response = await fetch("https://api.brevo.com/v3/smtp/email", {
             method: "POST",
             headers: {
@@ -286,13 +311,7 @@ async function sendEmail(email, subject, text, html) {
                 "api-key": process.env.BREVO_API_KEY,
                 "content-type": "application/json"
             },
-            body: JSON.stringify({
-                sender: { name: "Smartpost Auth", email: process.env.BREVO_SENDER_EMAIL || "smartpost.ai.1@gmail.com" },
-                to: [{ email: email }],
-                subject: subject,
-                htmlContent: html,
-                textContent: text
-            })
+            body: JSON.stringify(emailData)
         });
         
         if (!response.ok) {
