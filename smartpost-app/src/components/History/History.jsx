@@ -91,13 +91,11 @@ export default function History() {
     }
     setPublishingId(item.id);
     try {
+      const payload = { text: item.content };
       if (item.imageUrl) {
-        // We need to fetch the image as a blob to upload it, or the backend needs to handle it.
-        // For simplicity and since manual publish didn't support images before, we just send text.
-        await axios.post(`${API}/linkedin/post`, { text: item.content }, { headers: authHeaders() });
-      } else {
-        await axios.post(`${API}/linkedin/post`, { text: item.content }, { headers: authHeaders() });
+        payload.imageUrl = item.imageUrl;
       }
+      await axios.post(`${API}/linkedin/post`, payload, { headers: authHeaders() });
       showToast(<><Send size={14} /> Published to LinkedIn!</>);
     } catch (err) {
       showToast('❌ Failed to publish post');

@@ -1,6 +1,7 @@
 const axios = require("axios");
 const prisma = require("../prisma/client");
 const fs = require("fs");
+const path = require("path");
 
 const LINKEDIN_AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization";
 const LINKEDIN_TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken";
@@ -221,18 +222,44 @@ const getStatus = async (req, res) => {
  * Publishes a text post to the user's LinkedIn feed.
  */
 const createPost = async (req, res) => {
-  const { text } = req.body;
+  const { text, imageUrl } = req.body;
 
   if (!text || !text.trim()) {
     return res.status(400).json({ message: "text is required" });
   }
 
   try {
-    const fileObj = req.file ? {
+    let fileObj = req.file ? {
       path: req.file.path,
       mimetype: req.file.mimetype,
       filename: req.file.filename,
     } : null;
+
+    if (!fileObj && imageUrl) {
+      const filename = imageUrl.split('/').pop();
+      let localPath = null;
+      if (imageUrl.includes('/generated_images/')) {
+        localPath = path.join(__dirname, "../../public/generated_images", filename);
+      } else if (imageUrl.includes('/uploads/')) {
+        localPath = path.join(__dirname, "../../public/uploads", filename);
+      }
+
+      if (localPath && fs.existsSync(localPath)) {
+        const ext = path.extname(filename).toLowerCase();
+        let mimetype = "image/png";
+        if (ext === ".jpg" || ext === ".jpeg") {
+          mimetype = "image/jpeg";
+        } else if (ext === ".gif") {
+          mimetype = "image/gif";
+        }
+
+        fileObj = {
+          path: localPath,
+          mimetype,
+          filename,
+        };
+      }
+    }
 
     const { externalPostId, accountId } = await publishToLinkedInInternal(req.user.userId, text, fileObj);
 
@@ -242,7 +269,7 @@ const createPost = async (req, res) => {
         socialAccountId: accountId,
         content: text.trim(),
         type: fileObj ? "image" : "text",
-        mediaUrl: fileObj ? `/public/uploads/${fileObj.filename}` : null,
+        mediaUrl: fileObj ? (imageUrl || `/public/uploads/${fileObj.filename}`) : null,
         status: "posted",
         externalPostId,
       },
